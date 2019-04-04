@@ -5,6 +5,7 @@
  */
 export * from '../generated-wrappers/address';
 export * from '../generated-wrappers/i_ownable';
+export * from '../generated-wrappers/lib_asset_data';
 export * from '../generated-wrappers/lib_bytes';
 export * from '../generated-wrappers/ownable';
 export * from '../generated-wrappers/reentrancy_guard';

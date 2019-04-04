@@ -24,6 +24,7 @@
     },
     "contracts": [
         "src/Address.sol",
+        "src/LibAssetData.sol",
         "src/LibBytes.sol",
         "src/Ownable.sol",
         "src/ReentrancyGuard.sol",
