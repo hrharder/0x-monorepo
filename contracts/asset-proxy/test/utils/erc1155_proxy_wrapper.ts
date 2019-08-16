@@ -36,11 +36,7 @@ export class ERC1155ProxyWrapper {
         const allArtifacts = _.merge(artifacts, erc1155Artifacts);
         this._logDecoder = new LogDecoder(this._web3Wrapper, allArtifacts);
         this._dummyTokenWrappers = [];
-        this._assetProxyInterface = new IAssetProxyContract(
-            artifacts.IAssetProxy.compilerOutput.abi,
-            constants.NULL_ADDRESS,
-            provider,
-        );
+        this._assetProxyInterface = new IAssetProxyContract(constants.NULL_ADDRESS, provider);
         this._tokenOwnerAddresses = tokenOwnerAddresses;
         this._contractOwnerAddress = contractOwnerAddress;
         this._fungibleTokenIds = [];
@@ -58,6 +54,7 @@ export class ERC1155ProxyWrapper {
                 erc1155Artifacts.ERC1155Mintable,
                 this._provider,
                 txDefaults,
+                artifacts,
             );
             const erc1155Wrapper = new Erc1155Wrapper(erc1155Contract, this._provider, this._contractOwnerAddress);
             this._dummyTokenWrappers.push(erc1155Wrapper);
@@ -73,6 +70,7 @@ export class ERC1155ProxyWrapper {
             artifacts.ERC1155Proxy,
             this._provider,
             txDefaults,
+            artifacts,
         );
         this._proxyIdIfExists = await this._proxyContract.getProxyId.callAsync();
         return this._proxyContract;
@@ -83,6 +81,66 @@ export class ERC1155ProxyWrapper {
     public getProxyId(): string {
         this._validateProxyContractExistsOrThrow();
         return this._proxyIdIfExists as string;
+    }
+    /**
+     * @dev generates abi-encoded tx data for transferring erc1155 fungible/non-fungible tokens.
+     * @param from source address
+     * @param to destination address
+     * @param contractAddress address of erc155 contract
+     * @param tokensToTransfer array of erc1155 tokens to transfer
+     * @param valuesToTransfer array of corresponding values for each erc1155 token to transfer
+     * @param valueMultiplier each value in `valuesToTransfer` is multiplied by this
+     * @param receiverCallbackData callback data if `to` is a contract
+     * @param authorizedSender sender of `transferFrom` transaction
+     * @param extraData extra data to append to `transferFrom` transaction. Optional.
+     * @return abi encoded tx data.
+     */
+    public getTransferFromAbiEncodedTxData(
+        from: string,
+        to: string,
+        contractAddress: string,
+        tokensToTransfer: BigNumber[],
+        valuesToTransfer: BigNumber[],
+        valueMultiplier: BigNumber,
+        receiverCallbackData: string,
+        authorizedSender: string,
+        assetData_?: string,
+    ): string {
+        this._validateProxyContractExistsOrThrow();
+        const assetData =
+            assetData_ === undefined
+                ? assetDataUtils.encodeERC1155AssetData(
+                      contractAddress,
+                      tokensToTransfer,
+                      valuesToTransfer,
+                      receiverCallbackData,
+                  )
+                : assetData_;
+        const data = this._assetProxyInterface.transferFrom.getABIEncodedTransactionData(
+            assetData,
+            from,
+            to,
+            valueMultiplier,
+        );
+        return data;
+    }
+    /**
+     * @dev transfers erc1155 fungible/non-fungible tokens.
+     * @param txData: abi-encoded tx data
+     * @param authorizedSender sender of `transferFrom` transaction
+     */
+    public async transferFromRawAsync(
+        txData: string,
+        authorizedSender: string,
+    ): Promise<TransactionReceiptWithDecodedLogs> {
+        const txHash = await this._web3Wrapper.sendTransactionAsync({
+            to: (this._proxyContract as ERC1155ProxyContract).address,
+            data: txData,
+            from: authorizedSender,
+            gas: 300000,
+        });
+        const txReceipt = await this._logDecoder.getTxWithDecodedLogsAsync(txHash);
+        return txReceipt;
     }
     /**
      * @dev transfers erc1155 fungible/non-fungible tokens.
@@ -106,20 +164,20 @@ export class ERC1155ProxyWrapper {
         valueMultiplier: BigNumber,
         receiverCallbackData: string,
         authorizedSender: string,
-        extraData?: string,
-    ): Promise<string> {
+        assetData_?: string,
+    ): Promise<TransactionReceiptWithDecodedLogs> {
         this._validateProxyContractExistsOrThrow();
-        let encodedAssetData = assetDataUtils.encodeERC1155AssetData(
-            contractAddress,
-            tokensToTransfer,
-            valuesToTransfer,
-            receiverCallbackData,
-        );
-        if (!_.isUndefined(extraData)) {
-            encodedAssetData = `${encodedAssetData}${extraData}`;
-        }
+        const assetData =
+            assetData_ === undefined
+                ? assetDataUtils.encodeERC1155AssetData(
+                      contractAddress,
+                      tokensToTransfer,
+                      valuesToTransfer,
+                      receiverCallbackData,
+                  )
+                : assetData_;
         const data = this._assetProxyInterface.transferFrom.getABIEncodedTransactionData(
-            encodedAssetData,
+            assetData,
             from,
             to,
             valueMultiplier,
@@ -128,46 +186,9 @@ export class ERC1155ProxyWrapper {
             to: (this._proxyContract as ERC1155ProxyContract).address,
             data,
             from: authorizedSender,
+            gas: 300000,
         });
-        return txHash;
-    }
-    /**
-     * @dev transfers erc1155 fungible/non-fungible tokens.
-     * @param from source address
-     * @param to destination address
-     * @param contractAddress address of erc155 contract
-     * @param tokensToTransfer array of erc1155 tokens to transfer
-     * @param valuesToTransfer array of corresponding values for each erc1155 token to transfer
-     * @param valueMultiplier each value in `valuesToTransfer` is multiplied by this
-     * @param receiverCallbackData callback data if `to` is a contract
-     * @param authorizedSender sender of `transferFrom` transaction
-     * @param extraData extra data to append to `transferFrom` transaction. Optional.
-     * @return tranasction receipt with decoded logs.
-     */
-    public async transferFromWithLogsAsync(
-        from: string,
-        to: string,
-        contractAddress: string,
-        tokensToTransfer: BigNumber[],
-        valuesToTransfer: BigNumber[],
-        valueMultiplier: BigNumber,
-        receiverCallbackData: string,
-        authorizedSender: string,
-        extraData?: string,
-    ): Promise<TransactionReceiptWithDecodedLogs> {
-        const txReceipt = await this._logDecoder.getTxWithDecodedLogsAsync(
-            await this.transferFromAsync(
-                from,
-                to,
-                contractAddress,
-                tokensToTransfer,
-                valuesToTransfer,
-                valueMultiplier,
-                receiverCallbackData,
-                authorizedSender,
-                extraData,
-            ),
-        );
+        const txReceipt = await this._logDecoder.getTxWithDecodedLogsAsync(txHash);
         return txReceipt;
     }
     /**
@@ -199,10 +220,10 @@ export class ERC1155ProxyWrapper {
                 // Mint tokens for each owner for this token
                 for (const tokenOwnerAddress of this._tokenOwnerAddresses) {
                     // tslint:disable-next-line:no-unused-variable
-                    if (_.isUndefined(fungibleHoldingsByOwner[tokenOwnerAddress])) {
+                    if (fungibleHoldingsByOwner[tokenOwnerAddress] === undefined) {
                         fungibleHoldingsByOwner[tokenOwnerAddress] = {};
                     }
-                    if (_.isUndefined(fungibleHoldingsByOwner[tokenOwnerAddress][dummyAddress])) {
+                    if (fungibleHoldingsByOwner[tokenOwnerAddress][dummyAddress] === undefined) {
                         fungibleHoldingsByOwner[tokenOwnerAddress][dummyAddress] = {};
                     }
                     fungibleHoldingsByOwner[tokenOwnerAddress][dummyAddress][tokenIdAsString] =
@@ -221,13 +242,13 @@ export class ERC1155ProxyWrapper {
                 const tokenIdAsString = tokenId.toString();
                 this._nonFungibleTokenIds.push(tokenIdAsString);
                 _.each(this._tokenOwnerAddresses, async (tokenOwnerAddress: string, i: number) => {
-                    if (_.isUndefined(nonFungibleHoldingsByOwner[tokenOwnerAddress])) {
+                    if (nonFungibleHoldingsByOwner[tokenOwnerAddress] === undefined) {
                         nonFungibleHoldingsByOwner[tokenOwnerAddress] = {};
                     }
-                    if (_.isUndefined(nonFungibleHoldingsByOwner[tokenOwnerAddress][dummyAddress])) {
+                    if (nonFungibleHoldingsByOwner[tokenOwnerAddress][dummyAddress] === undefined) {
                         nonFungibleHoldingsByOwner[tokenOwnerAddress][dummyAddress] = {};
                     }
-                    if (_.isUndefined(nonFungibleHoldingsByOwner[tokenOwnerAddress][dummyAddress][tokenIdAsString])) {
+                    if (nonFungibleHoldingsByOwner[tokenOwnerAddress][dummyAddress][tokenIdAsString] === undefined) {
                         nonFungibleHoldingsByOwner[tokenOwnerAddress][dummyAddress][tokenIdAsString] = [];
                     }
                     this._nfts.push({ id: nftIds[i], tokenId });
@@ -278,26 +299,25 @@ export class ERC1155ProxyWrapper {
             for (const tokenOwnerAddress of this._tokenOwnerAddresses) {
                 // Fungible tokens
                 for (const tokenId of this._fungibleTokenIds) {
-                    if (_.isUndefined(tokenHoldingsByOwner[tokenOwnerAddress])) {
+                    if (tokenHoldingsByOwner[tokenOwnerAddress] === undefined) {
                         tokenHoldingsByOwner[tokenOwnerAddress] = {};
                     }
-                    if (_.isUndefined(tokenHoldingsByOwner[tokenOwnerAddress][tokenAddress])) {
+                    if (tokenHoldingsByOwner[tokenOwnerAddress][tokenAddress] === undefined) {
                         tokenHoldingsByOwner[tokenOwnerAddress][tokenAddress] = {};
                     }
                     tokenHoldingsByOwner[tokenOwnerAddress][tokenAddress][tokenId] = balances[i++];
                 }
                 // Non-fungible tokens
                 for (const nft of this._nfts) {
-                    if (_.isUndefined(nonFungibleHoldingsByOwner[tokenOwnerAddress])) {
+                    if (nonFungibleHoldingsByOwner[tokenOwnerAddress] === undefined) {
                         nonFungibleHoldingsByOwner[tokenOwnerAddress] = {};
                     }
-                    if (_.isUndefined(nonFungibleHoldingsByOwner[tokenOwnerAddress][tokenAddress])) {
+                    if (nonFungibleHoldingsByOwner[tokenOwnerAddress][tokenAddress] === undefined) {
                         nonFungibleHoldingsByOwner[tokenOwnerAddress][tokenAddress] = {};
                     }
                     if (
-                        _.isUndefined(
-                            nonFungibleHoldingsByOwner[tokenOwnerAddress][tokenAddress][nft.tokenId.toString()],
-                        )
+                        nonFungibleHoldingsByOwner[tokenOwnerAddress][tokenAddress][nft.tokenId.toString()] ===
+                        undefined
                     ) {
                         nonFungibleHoldingsByOwner[tokenOwnerAddress][tokenAddress][nft.tokenId.toString()] = [];
                     }
@@ -348,25 +368,25 @@ export class ERC1155ProxyWrapper {
         const tokenWrapper = _.find(this._dummyTokenWrappers, (wrapper: Erc1155Wrapper) => {
             return wrapper.getContract().address === contractAddress;
         });
-        if (_.isUndefined(tokenWrapper)) {
+        if (tokenWrapper === undefined) {
             throw new Error(`Contract: ${contractAddress} was not deployed through ERC1155ProxyWrapper`);
         }
         return tokenWrapper;
     }
     private _getContractFromAddress(tokenAddress: string): ERC1155MintableContract {
         const tokenContractIfExists = _.find(this._dummyTokenWrappers, c => c.getContract().address === tokenAddress);
-        if (_.isUndefined(tokenContractIfExists)) {
+        if (tokenContractIfExists === undefined) {
             throw new Error(`Token: ${tokenAddress} was not deployed through ERC1155ProxyWrapper`);
         }
         return tokenContractIfExists.getContract();
     }
     private _validateDummyTokenContractsExistOrThrow(): void {
-        if (_.isUndefined(this._dummyTokenWrappers)) {
+        if (this._dummyTokenWrappers === undefined) {
             throw new Error('Dummy ERC1155 tokens not yet deployed, please call "deployDummyTokensAsync"');
         }
     }
     private _validateProxyContractExistsOrThrow(): void {
-        if (_.isUndefined(this._proxyContract)) {
+        if (this._proxyContract === undefined) {
             throw new Error('ERC1155 proxy contract not yet deployed, please call "deployProxyAsync"');
         }
     }

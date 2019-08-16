@@ -1,8 +1,8 @@
-import { colors } from '@0x/react-shared';
 import { BigNumber } from '@0x/utils';
 import { Web3Wrapper } from '@0x/web3-wrapper';
 import * as _ from 'lodash';
 import * as React from 'react';
+import { colors } from 'ts/utils/colors';
 import { utils } from 'ts/utils/utils';
 
 interface AssetSendCompletedProps {
@@ -17,7 +17,7 @@ interface AssetSendCompletedState {}
 
 export class AssetSendCompleted extends React.Component<AssetSendCompletedProps, AssetSendCompletedState> {
     public render(): React.ReactNode {
-        const etherScanLink = !_.isUndefined(this.props.etherScanLinkIfExists) && (
+        const etherScanLink = this.props.etherScanLinkIfExists !== undefined && (
             <a style={{ color: colors.white }} href={`${this.props.etherScanLinkIfExists}`} target="_blank">
                 Verify on Etherscan
             </a>

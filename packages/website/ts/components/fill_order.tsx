@@ -1,5 +1,4 @@
 import { assetDataUtils, orderHashUtils } from '@0x/order-utils';
-import { colors, Link } from '@0x/react-shared';
 import { BigNumber, logUtils } from '@0x/utils';
 import { Web3Wrapper } from '@0x/web3-wrapper';
 import * as accounting from 'accounting';
@@ -22,9 +21,12 @@ import { portalOrderSchema } from 'ts/schemas/portal_order_schema';
 import { validator } from 'ts/schemas/validator';
 import { AlertTypes, BlockchainErrs, PortalOrder, Token, TokenByAddress, WebsitePaths } from 'ts/types';
 import { analytics } from 'ts/utils/analytics';
+import { colors } from 'ts/utils/colors';
 import { errorReporter } from 'ts/utils/error_reporter';
 import { orderParser } from 'ts/utils/order_parser';
 import { utils } from 'ts/utils/utils';
+
+import { Link } from './documentation/shared/link';
 
 interface FillOrderProps {
     blockchain: Blockchain;
@@ -75,7 +77,7 @@ export class FillOrder extends React.Component<FillOrderProps, FillOrderState> {
             areAllInvolvedTokensTracked: false,
             didFillOrderSucceed: false,
             didCancelOrderSucceed: false,
-            orderJSON: _.isUndefined(this.props.initialOrder) ? '' : JSON.stringify(this.props.initialOrder),
+            orderJSON: this.props.initialOrder === undefined ? '' : JSON.stringify(this.props.initialOrder),
             orderJSONErrMsg: '',
             parsedOrder: this.props.initialOrder,
             unavailableTakerAmount: new BigNumber(0),
@@ -125,7 +127,7 @@ export class FillOrder extends React.Component<FillOrderProps, FillOrderState> {
                         </div>
                     )}
                     <div>
-                        {!_.isUndefined(this.state.parsedOrder) &&
+                        {this.state.parsedOrder !== undefined &&
                             this.state.didOrderValidationRun &&
                             this.state.areAllInvolvedTokensTracked &&
                             this._renderVisualOrder()}
@@ -173,7 +175,7 @@ export class FillOrder extends React.Component<FillOrderProps, FillOrderState> {
     private _renderOrderJsonNotices(): React.ReactNode {
         return (
             <div>
-                {!_.isUndefined(this.props.initialOrder) && !this.state.didOrderValidationRun && (
+                {this.props.initialOrder !== undefined && !this.state.didOrderValidationRun && (
                     <div className="pt2">
                         <span className="pr1">
                             <i className="zmdi zmdi-spinner zmdi-hc-spin" />
@@ -215,7 +217,7 @@ export class FillOrder extends React.Component<FillOrderProps, FillOrderState> {
         const parsedOrderExpiration = this.state.parsedOrder.signedOrder.expirationTimeSeconds;
 
         let orderReceiveAmount = 0;
-        if (!_.isUndefined(this.props.orderFillAmount)) {
+        if (this.props.orderFillAmount !== undefined) {
             const orderReceiveAmountBigNumber = orderMakerAmount
                 .times(this.props.orderFillAmount)
                 .dividedBy(orderTakerAmount)
@@ -223,7 +225,7 @@ export class FillOrder extends React.Component<FillOrderProps, FillOrderState> {
             orderReceiveAmount = this._formatCurrencyAmount(orderReceiveAmountBigNumber, makerToken.decimals);
         }
         const isUserMaker =
-            !_.isUndefined(this.state.parsedOrder) &&
+            this.state.parsedOrder !== undefined &&
             this.state.parsedOrder.signedOrder.makerAddress === this.props.userAddress;
         const expiryDate = utils.convertToReadableDateTimeFromUnixTimestamp(parsedOrderExpiration);
         return (
@@ -376,8 +378,8 @@ export class FillOrder extends React.Component<FillOrderProps, FillOrderState> {
         const makerTokenIfExists = this.props.tokenByAddress[makerTokenAddress];
         const takerTokenIfExists = this.props.tokenByAddress[takerTokenAddress];
         const tokensToTrack: Token[] = [];
-        const isUnseenMakerToken = _.isUndefined(makerTokenIfExists);
-        const isMakerTokenTracked = !_.isUndefined(makerTokenIfExists) && utils.isTokenTracked(makerTokenIfExists);
+        const isUnseenMakerToken = makerTokenIfExists === undefined;
+        const isMakerTokenTracked = makerTokenIfExists !== undefined && utils.isTokenTracked(makerTokenIfExists);
         if (isUnseenMakerToken) {
             tokensToTrack.push({
                 ...this.state.parsedOrder.metadata.makerToken,
@@ -389,8 +391,8 @@ export class FillOrder extends React.Component<FillOrderProps, FillOrderState> {
         } else if (!isMakerTokenTracked) {
             tokensToTrack.push(makerTokenIfExists);
         }
-        const isUnseenTakerToken = _.isUndefined(takerTokenIfExists);
-        const isTakerTokenTracked = !_.isUndefined(takerTokenIfExists) && utils.isTokenTracked(takerTokenIfExists);
+        const isUnseenTakerToken = takerTokenIfExists === undefined;
+        const isTakerTokenTracked = takerTokenIfExists !== undefined && utils.isTokenTracked(takerTokenIfExists);
         if (isUnseenTakerToken) {
             tokensToTrack.push({
                 ...this.state.parsedOrder.metadata.takerToken,
@@ -512,7 +514,7 @@ export class FillOrder extends React.Component<FillOrderProps, FillOrderState> {
         const parsedOrder = this.state.parsedOrder;
         const takerFillAmount = this.props.orderFillAmount;
 
-        if (_.isUndefined(this.props.userAddress)) {
+        if (this.props.userAddress === undefined) {
             this.props.dispatcher.updateShouldBlockchainErrDialogBeOpen(true);
             this.setState({
                 isFilling: false,
@@ -521,7 +523,7 @@ export class FillOrder extends React.Component<FillOrderProps, FillOrderState> {
         }
         let globalErrMsg = '';
 
-        if (_.isUndefined(takerFillAmount)) {
+        if (takerFillAmount === undefined) {
             globalErrMsg = 'You must specify a fill amount';
         }
 
@@ -591,7 +593,7 @@ export class FillOrder extends React.Component<FillOrderProps, FillOrderState> {
         const parsedOrder = this.state.parsedOrder;
         const takerAddress = this.props.userAddress;
 
-        if (_.isUndefined(takerAddress)) {
+        if (takerAddress === undefined) {
             this.props.dispatcher.updateShouldBlockchainErrDialogBeOpen(true);
             this.setState({
                 isFilling: false,

@@ -77,7 +77,6 @@ TODO.md
 
 packages/website/public/bundle*
 packages/dev-tools-pages/public/bundle*
-packages/react-docs/example/public/bundle*
 
 # server cli
 packages/testnet-faucets/server/
@@ -94,11 +93,13 @@ contracts/erc721/generated-artifacts/
 contracts/erc1155/generated-artifacts/
 contracts/extensions/generated-artifacts/
 contracts/exchange-forwarder/generated-artifacts/
+contracts/dev-utils/generated-artifacts/
 packages/sol-tracing-utils/test/fixtures/artifacts/
-packages/metacoin/artifacts/
+python-packages/contract_artifacts/src/zero_ex/contract_artifacts/artifacts/
 
 # generated contract wrappers
-packages/abi-gen-wrappers/wrappers
+packages/abi-gen-wrappers/src/generated-wrappers/
+packages/python-contract-wrappers/generated/
 contracts/coordinator/generated-wrappers/
 contracts/exchange/generated-wrappers/
 contracts/asset-proxy/generated-wrappers/
@@ -110,7 +111,30 @@ contracts/erc721/generated-wrappers/
 contracts/erc1155/generated-wrappers/
 contracts/extensions/generated-wrappers/
 contracts/exchange-forwarder/generated-wrappers/
-packages/metacoin/src/contract_wrappers
+contracts/dev-utils/generated-wrappers/
+python-packages/contract_wrappers/src/zero_ex/contract_wrappers/erc20_token/__init__.py
+python-packages/contract_wrappers/src/zero_ex/contract_wrappers/exchange/__init__.py
+python-packages/contract_wrappers/src/zero_ex/contract_wrappers/asset_proxy_owner/__init__.py
+python-packages/contract_wrappers/src/zero_ex/contract_wrappers/coordinator/__init__.py
+python-packages/contract_wrappers/src/zero_ex/contract_wrappers/coordinator_registry/__init__.py
+python-packages/contract_wrappers/src/zero_ex/contract_wrappers/dummy_erc20_token/__init__.py
+python-packages/contract_wrappers/src/zero_ex/contract_wrappers/dummy_erc721_token/__init__.py
+python-packages/contract_wrappers/src/zero_ex/contract_wrappers/dutch_auction/__init__.py
+python-packages/contract_wrappers/src/zero_ex/contract_wrappers/erc20_proxy/__init__.py
+python-packages/contract_wrappers/src/zero_ex/contract_wrappers/erc721_proxy/__init__.py
+python-packages/contract_wrappers/src/zero_ex/contract_wrappers/erc721_token/__init__.py
+python-packages/contract_wrappers/src/zero_ex/contract_wrappers/eth_balance_checker/__init__.py
+python-packages/contract_wrappers/src/zero_ex/contract_wrappers/forwarder/__init__.py
+python-packages/contract_wrappers/src/zero_ex/contract_wrappers/i_asset_proxy/__init__.py
+python-packages/contract_wrappers/src/zero_ex/contract_wrappers/i_validator/__init__.py
+python-packages/contract_wrappers/src/zero_ex/contract_wrappers/i_wallet/__init__.py
+python-packages/contract_wrappers/src/zero_ex/contract_wrappers/multi_asset_proxy/__init__.py
+python-packages/contract_wrappers/src/zero_ex/contract_wrappers/order_validator/__init__.py
+python-packages/contract_wrappers/src/zero_ex/contract_wrappers/weth9/__init__.py
+python-packages/contract_wrappers/src/zero_ex/contract_wrappers/zrx_token/__init__.py
+
+# cli test output
+packages/abi-gen/test-cli/output
 
 # solc-bin in sol-compiler
 packages/sol-compiler/solc_bin/
@@ -127,3 +151,6 @@ python-packages/*/dist
 __pycache__
 python-packages/*/src/*.egg-info
 python-packages/*/.coverage
+
+# python keeps package-local copies of json schemas
+python-packages/json_schemas/src/zero_ex/json_schemas/schemas

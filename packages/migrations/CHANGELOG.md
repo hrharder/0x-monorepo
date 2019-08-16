@@ -5,6 +5,50 @@ Edit the package's CHANGELOG.json file only.
 
 CHANGELOG
 
+## v4.2.0 - _August 8, 2019_
+
+    * Added StaticCallAssetProxy and ERC1155AssetProxy (#2021)
+
+## v4.1.11 - _July 31, 2019_
+
+    * Updated calls to <contract wrapper>.deploy0xArtifactAsync to include log decode dependencies. (#1995)
+
+## v4.1.10 - _July 24, 2019_
+
+    * Dependencies updated
+
+## v4.1.9 - _July 15, 2019_
+
+    * Dependencies updated
+
+## v4.1.8 - _July 13, 2019_
+
+    * Dependencies updated
+
+## v4.1.7 - _July 13, 2019_
+
+    * Dependencies updated
+
+## v4.1.6 - _May 24, 2019_
+
+    * Dependencies updated
+
+## v4.1.5 - _May 15, 2019_
+
+    * Dependencies updated
+
+## v4.1.4 - _May 14, 2019_
+
+    * Add --pk flag to accept private key when migrating (#1811)
+
+## v4.1.2 - _May 10, 2019_
+
+    * Dependencies updated
+
+## v4.1.1 - _April 11, 2019_
+
+    * Dependencies updated
+
 ## v4.1.0 - _March 21, 2019_
 
     * Add deployment of `Coordinator` and `CoordinatorRegistry` contracts to migration script (#1689)

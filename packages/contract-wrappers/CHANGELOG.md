@@ -5,6 +5,57 @@ Edit the package's CHANGELOG.json file only.
 
 CHANGELOG
 
+## v11.0.0 - _August 8, 2019_
+
+    * Use @0x/abi-gen to generate wrappers. For a full list of changes, see https://github.com/0xProject/0x-monorepo/issues/2040 (#2037)
+
+## v10.1.0 - _July 31, 2019_
+
+    * Updated interface to `deployFrom0xArtifactAsync` to include log decode dependencies. (#1995)
+    * Updated interface to `deployAsync` to include log decode dependencies. (#1995)
+
+## v10.0.0 - _Invalid date_
+
+    * Constructors for `ERC20TokenWrapper`, `ERC721TokenWrapper`, and `EtherTokenWrapper` no longer accept networkId (#1970)
+
+## v9.1.8 - _July 24, 2019_
+
+    * re-export new ethereum-types type, TupleDataItem (#1919)
+
+## v9.1.7 - _July 15, 2019_
+
+    * Dependencies updated
+
+## v9.1.6 - _July 13, 2019_
+
+    * Dependencies updated
+
+## v9.1.5 - _July 13, 2019_
+
+    * Use assetDataUtils for encoding and decoding DutchAuctionData
+
+## v9.1.4 - _May 24, 2019_
+
+    * Dependencies updated
+
+## v9.1.3 - _May 15, 2019_
+
+    * Fix decoding bug in `DutchAuctionWrapper.decodeDutchAuctionData` (#1815)
+    * Fallback to eth_sign if eth_signedTypedData fails (#1817)
+
+## v9.1.2 - _May 14, 2019_
+
+    * Dependencies updated
+
+## v9.1.0 - _May 10, 2019_
+
+    * Added CoordinatorWrapper to support orders with the Coordinator extension contract (#1792)
+
+## v9.0.0 - _April 11, 2019_
+
+    * Added a simulation to transfer from maker to taker during `exchange.validateOrderFillableOrThrowAsync` (#1714)
+    * Added additional properties to `ValidateOrderFillableOpts`. An order can now be validated to fill a non-zero amount by specifying `validateRemainingOrderAmountIsFillable` as `false`. The default `true` will continue to validate the entire remaining balance is fillable. (#1714)
+
 ## v8.0.5 - _March 21, 2019_
 
     * Dependencies updated

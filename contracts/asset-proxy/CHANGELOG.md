@@ -5,6 +5,52 @@ Edit the package's CHANGELOG.json file only.
 
 CHANGELOG
 
+## v2.2.5 - _August 8, 2019_
+
+    * Dependencies updated
+
+## v2.2.4 - _July 31, 2019_
+
+    * Updated calls to <contract wrapper>.deployFrom0xArtifactAsync to include artifact dependencies. (#1995)
+
+## v2.2.3 - _July 24, 2019_
+
+    * Dependencies updated
+
+## v2.2.2 - _July 15, 2019_
+
+    * Dependencies updated
+
+## v2.2.1 - _July 13, 2019_
+
+    * Dependencies updated
+
+## v2.2.0 - _July 13, 2019_
+
+    * Add `LibAssetProxyIds` contract (#1835)
+    * Updated ERC1155 Asset Proxy. Less optimization. More explicit handling of edge cases. (#1852)
+    * Implement StaticCallProxy (#1863)
+
+## v2.1.5 - _May 24, 2019_
+
+    * Dependencies updated
+
+## v2.1.4 - _May 15, 2019_
+
+    * Dependencies updated
+
+## v2.1.3 - _May 14, 2019_
+
+    * Dependencies updated
+
+## v2.1.2 - _May 10, 2019_
+
+    * Update tests to use contract-built-in `awaitTransactionSuccessAsync` (#1797)
+
+## v2.1.1 - _April 11, 2019_
+
+    * Dependencies updated
+
 ## v2.1.0 - _March 21, 2019_
 
     * Run Web3ProviderEngine without excess block polling (#1695)

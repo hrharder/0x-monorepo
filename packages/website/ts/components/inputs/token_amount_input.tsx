@@ -1,10 +1,11 @@
-import { colors, Link } from '@0x/react-shared';
 import { BigNumber } from '@0x/utils';
 import { Web3Wrapper } from '@0x/web3-wrapper';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { Blockchain } from 'ts/blockchain';
+import { Link } from 'ts/components/documentation/shared/link';
 import { BalanceBoundedInput } from 'ts/components/inputs/balance_bounded_input';
+import { colors } from 'ts/style/colors';
 import { Token, ValidatedBigNumberCallback, WebsitePaths } from 'ts/types';
 
 interface TokenAmountInputProps {
@@ -99,7 +100,7 @@ export class TokenAmountInput extends React.Component<TokenAmountInputProps, Tok
     }
     private _onChange(isValid: boolean, amount?: BigNumber): void {
         let baseUnitAmount;
-        if (!_.isUndefined(amount)) {
+        if (amount !== undefined) {
             baseUnitAmount = Web3Wrapper.toBaseUnitAmount(amount, this.props.token.decimals);
         }
         this.props.onChange(isValid, baseUnitAmount);
@@ -140,13 +141,13 @@ export class TokenAmountInput extends React.Component<TokenAmountInputProps, Tok
         }
     }
     private _getStyle(): React.CSSProperties {
-        const hasLabel = !_.isUndefined(this.props.label);
-        return !_.isUndefined(this.props.style)
+        const hasLabel = this.props.label !== undefined;
+        return this.props.style !== undefined
             ? this.props.style
             : { height: hasLabel ? HEIGHT_WITH_LABEL : HEIGHT_WITHOUT_LABEL };
     }
     private _getLabelStyle(): React.CSSProperties {
-        const hasLabel = !_.isUndefined(this.props.label);
+        const hasLabel = this.props.label !== undefined;
         return this.props.labelStyle || { paddingTop: hasLabel ? 39 : 14 };
     }
 }

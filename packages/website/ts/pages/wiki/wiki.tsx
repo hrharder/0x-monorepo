@@ -1,24 +1,18 @@
-import {
-    ALink,
-    colors,
-    constants as sharedConstants,
-    HeaderSizes,
-    Link,
-    MarkdownSection,
-    utils as sharedUtils,
-} from '@0x/react-shared';
 import { ObjectMap } from '@0x/types';
 import * as _ from 'lodash';
 import CircularProgress from 'material-ui/CircularProgress';
 import * as React from 'react';
+import { Link } from 'ts/components/documentation/shared/link';
+import { MarkdownSection } from 'ts/components/documentation/shared/markdown_section';
 import { SidebarHeader } from 'ts/components/documentation/sidebar_header';
 import { NestedSidebarMenu } from 'ts/components/nested_sidebar_menu';
 import { Button } from 'ts/components/ui/button';
 import { Container } from 'ts/components/ui/container';
 import { DevelopersPage } from 'ts/pages/documentation/developers_page';
 import { Dispatcher } from 'ts/redux/dispatcher';
-import { Article, ArticlesBySection, Deco, Key, ScreenWidths } from 'ts/types';
+import { ALink, Article, ArticlesBySection, Deco, HeaderSizes, Key, ScreenWidths } from 'ts/types';
 import { backendClient } from 'ts/utils/backend_client';
+import { colors } from 'ts/utils/colors';
 import { constants } from 'ts/utils/constants';
 import { Translate } from 'ts/utils/translate';
 import { utils } from 'ts/utils/utils';
@@ -58,27 +52,28 @@ export class Wiki extends React.Component<WikiProps, WikiState> {
         clearTimeout(this._wikiBackoffTimeoutId);
     }
     public render(): React.ReactNode {
-        const sectionNameToLinks = _.isUndefined(this.state.articlesBySection)
-            ? {}
-            : this._getSectionNameToLinks(this.state.articlesBySection);
+        const sectionNameToLinks =
+            this.state.articlesBySection === undefined ? {} : this._getSectionNameToLinks(this.state.articlesBySection);
 
-        const mainContent = _.isUndefined(this.state.articlesBySection) ? (
-            <div className="flex justify-center">{this._renderLoading()}</div>
-        ) : (
-            <div id="wiki" style={{ paddingRight: 2 }}>
-                {this._renderWikiArticles()}
-            </div>
-        );
+        const mainContent =
+            this.state.articlesBySection === undefined ? (
+                <div className="flex justify-center">{this._renderLoading()}</div>
+            ) : (
+                <div id="wiki" style={{ paddingRight: 2 }}>
+                    {this._renderWikiArticles()}
+                </div>
+            );
         const isSmallScreen = this.props.screenWidth === ScreenWidths.Sm;
-        const sidebar = _.isUndefined(this.state.articlesBySection) ? (
-            <div />
-        ) : (
-            <NestedSidebarMenu
-                sidebarHeader={isSmallScreen ? this._renderSidebarHeader() : undefined}
-                sectionNameToLinks={sectionNameToLinks}
-                screenWidth={this.props.screenWidth}
-            />
-        );
+        const sidebar =
+            this.state.articlesBySection === undefined ? (
+                <div />
+            ) : (
+                <NestedSidebarMenu
+                    sidebarHeader={isSmallScreen ? this._renderSidebarHeader() : undefined}
+                    sectionNameToLinks={sectionNameToLinks}
+                    screenWidth={this.props.screenWidth}
+                />
+            );
         return (
             <DevelopersPage
                 sidebar={sidebar}
@@ -164,7 +159,7 @@ export class Wiki extends React.Component<WikiProps, WikiState> {
                     async () => {
                         await utils.onPageLoadPromise;
                         const hash = this.props.location.hash.slice(1);
-                        sharedUtils.scrollToHash(hash, sharedConstants.SCROLL_CONTAINER_ID);
+                        utils.scrollToHash(hash, constants.SCROLL_CONTAINER_ID);
                     },
                 );
             }
@@ -187,7 +182,7 @@ export class Wiki extends React.Component<WikiProps, WikiState> {
             const articles = articlesBySection[sectionName];
             const articleLinks = _.map(articles, article => {
                 return {
-                    to: sharedUtils.getIdFromName(article.title),
+                    to: utils.getIdFromName(article.title),
                     title: article.title,
                 };
             });

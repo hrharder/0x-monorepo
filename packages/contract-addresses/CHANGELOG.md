@@ -5,6 +5,30 @@ Edit the package's CHANGELOG.json file only.
 
 CHANGELOG
 
+## v3.0.3 - _August 8, 2019_
+
+    * Added StaticCallAssetProxy and ERC1155AssetProxy (#2021)
+
+## v3.0.2 - _July 15, 2019_
+
+    * Update OrderValidator testnet addresses
+
+## v3.0.1 - _July 13, 2019_
+
+    * Update remaining Mainnet V2.1 contract addresses
+
+## v3.0.0 - _July 13, 2019_
+
+    * Redeployed Mainnet Exchange and Asset Proxies
+
+## v2.3.3 - _May 14, 2019_
+
+    * Redeploy Coordinator contract (#1812)
+
+## v2.3.1 - _April 11, 2019_
+
+    * Dependencies updated
+
 ## v2.3.0 - _March 21, 2019_
 
     * Add addresses for coordinator extension contract and coordinator registry (#1689)

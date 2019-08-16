@@ -12,7 +12,7 @@ import { Changelog, Package } from './types';
 import { utils } from './utils/utils';
 
 // Packages might not be runnable if they are command-line tools or only run in browsers.
-const UNRUNNABLE_PACKAGES = ['@0x/abi-gen', '@0x/react-shared', '@0x/react-docs'];
+const UNRUNNABLE_PACKAGES = ['@0x/abi-gen'];
 
 const mkdirpAsync = promisify(mkdirp);
 const rimrafAsync = promisify(rimraf);
@@ -36,7 +36,7 @@ function findPackageIndex(packages: Package[], packageName: string): number {
 }
 
 function logIfDefined(x: any): void {
-    if (!_.isUndefined(x)) {
+    if (x !== undefined) {
         utils.log(x);
     }
 }
@@ -53,7 +53,7 @@ function logIfDefined(x: any): void {
     const packages = utils.getTopologicallySortedPackages(monorepoRootPath);
     const installablePackages = _.filter(
         packages,
-        pkg => !pkg.packageJson.private && !_.isUndefined(pkg.packageJson.main) && pkg.packageJson.main.endsWith('.js'),
+        pkg => !pkg.packageJson.private && pkg.packageJson.main !== undefined && pkg.packageJson.main.endsWith('.js'),
     );
     const CHUNK_SIZE = 15;
     const chunkedInstallablePackages = _.chunk(installablePackages, CHUNK_SIZE);

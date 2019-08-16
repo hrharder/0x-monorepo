@@ -1,5 +1,67 @@
 [
     {
+        "version": "4.0.0",
+        "changes": [
+            {
+                "note": "Removed @0x/order-watcher"
+            }
+        ]
+    },
+    {
+        "timestamp": 1565296576,
+        "version": "3.1.13",
+        "changes": [
+            {
+                "note": "Dependencies updated"
+            }
+        ]
+    },
+    {
+        "timestamp": 1564604963,
+        "version": "3.1.12",
+        "changes": [
+            {
+                "note": "Dependencies updated"
+            }
+        ]
+    },
+    {
+        "version": "3.1.11",
+        "changes": [
+            {
+                "note": "permit mixed-case addresses"
+            }
+        ],
+        "timestamp": 1563957393
+    },
+    {
+        "timestamp": 1563006338,
+        "version": "3.0.11",
+        "changes": [
+            {
+                "note": "Dependencies updated"
+            }
+        ]
+    },
+    {
+        "timestamp": 1557507213,
+        "version": "3.0.10",
+        "changes": [
+            {
+                "note": "Dependencies updated"
+            }
+        ]
+    },
+    {
+        "version": "3.0.9",
+        "changes": [
+            {
+                "note": "Dependencies updated"
+            }
+        ],
+        "timestamp": 1554997931
+    },
+    {
         "timestamp": 1553183790,
         "version": "3.0.8",
         "changes": [

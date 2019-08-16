@@ -1,7 +1,7 @@
 {
     "artifactsDir": "./generated-artifacts",
     "contractsDir": "./contracts",
-    "useDockerisedSolc": true,
+    "useDockerisedSolc": false,
     "isOfflineMode": false,
     "compilerSettings": {
         "evmVersion": "constantinople",
@@ -14,6 +14,7 @@
             "*": {
                 "*": [
                     "abi",
+                    "devdoc",
                     "evm.bytecode.object",
                     "evm.bytecode.sourceMap",
                     "evm.deployedBytecode.object",
@@ -31,6 +32,8 @@
         "src/interfaces/IOwnable.sol",
         "test/TestConstants.sol",
         "test/TestLibAddressArray.sol",
-        "test/TestLibBytes.sol"
+        "test/TestLibBytes.sol",
+        "test/TestLogDecoding.sol",
+        "test/TestLogDecodingDownstream.sol"
     ]
 }

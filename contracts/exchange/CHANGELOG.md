@@ -5,6 +5,50 @@ Edit the package's CHANGELOG.json file only.
 
 CHANGELOG
 
+## v2.1.11 - _August 8, 2019_
+
+    * Dependencies updated
+
+## v2.1.10 - _July 31, 2019_
+
+    * Updated calls to <contract wrapper>.deployFrom0xArtifactAsync to include artifact dependencies. (#1995)
+
+## v2.1.9 - _July 24, 2019_
+
+    * Dependencies updated
+
+## v2.1.8 - _July 15, 2019_
+
+    * Dependencies updated
+
+## v2.1.7 - _July 13, 2019_
+
+    * Dependencies updated
+
+## v2.1.6 - _July 13, 2019_
+
+    * Dependencies updated
+
+## v2.1.5 - _May 24, 2019_
+
+    * Dependencies updated
+
+## v2.1.4 - _May 15, 2019_
+
+    * Dependencies updated
+
+## v2.1.3 - _May 14, 2019_
+
+    * Dependencies updated
+
+## v2.1.2 - _May 10, 2019_
+
+    * Dependencies updated
+
+## v2.1.1 - _April 11, 2019_
+
+    * Dependencies updated
+
 ## v2.1.0 - _March 21, 2019_
 
     * Run Web3ProviderEngine without excess block polling (#1695)

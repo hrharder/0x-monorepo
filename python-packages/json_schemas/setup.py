@@ -5,12 +5,32 @@
 import distutils.command.build_py
 from distutils.command.clean import clean
 import subprocess  # nosec
-from shutil import rmtree
+from shutil import copytree, rmtree
 from os import environ, path
 from sys import argv
 
 from setuptools import find_packages, setup
 from setuptools.command.test import test as TestCommand
+
+
+class PreInstallCommand(distutils.command.build_py.build_py):
+    """Custom setuptools command class for pulling in schemas."""
+
+    description = "Pull in the schemas that live in the TypeScript package."
+
+    def run(self):
+        """Copy files from TS area to local src."""
+        pkgdir = path.dirname(path.realpath(argv[0]))
+        rmtree(
+            path.join(pkgdir, "src", "zero_ex", "json_schemas", "schemas"),
+            ignore_errors=True,
+        )
+        copytree(
+            path.join(
+                pkgdir, "..", "..", "packages", "json-schemas", "schemas"
+            ),
+            path.join(pkgdir, "src", "zero_ex", "json_schemas", "schemas"),
+        )
 
 
 class TestCommandExtension(TestCommand):
@@ -20,7 +40,8 @@ class TestCommandExtension(TestCommand):
         """Invoke pytest."""
         import pytest
 
-        exit(pytest.main(["--doctest-modules"]))
+        exit(pytest.main(["--doctest-modules", "-rapP"]))
+        #        show short test summary at end ^
 
 
 class LintCommand(distutils.command.build_py.build_py):
@@ -41,15 +62,6 @@ class LintCommand(distutils.command.build_py.build_py):
             "mypy src test setup.py".split(),
             # security issue checker:
             "bandit -r src ./setup.py".split(),
-            # HACK: ensure json schemas don't differ from the authoritative
-            # copies: this is a hack.  ideally we would symlink to the
-            # authoritative copies, but a problem with setuptools is preventing
-            # it from following symlinks when gathering package_data.  see
-            # https://github.com/pypa/setuptools/issues/415.
-            (
-                "diff src/zero_ex/json_schemas/schemas"
-                + " ../../packages/json-schemas/schemas"
-            ).split(),
             # general linter:
             "pylint src test setup.py".split(),
             # pylint takes relatively long to run, so it runs last, to enable
@@ -127,7 +139,7 @@ with open("README.md", "r") as file_handle:
 
 setup(
     name="0x-json-schemas",
-    version="1.0.0",
+    version="1.1.0",
     description="JSON schemas for 0x applications",
     long_description=README_MD,
     long_description_content_type="text/markdown",
@@ -138,6 +150,7 @@ setup(
     author="F. Eugene Aumson",
     author_email="feuGeneA@users.noreply.github.com",
     cmdclass={
+        "pre_install": PreInstallCommand,
         "clean": CleanCommandExtension,
         "lint": LintCommand,
         "test": TestCommandExtension,
@@ -148,6 +161,8 @@ setup(
     install_requires=["jsonschema", "mypy_extensions", "stringcase"],
     extras_require={
         "dev": [
+            "0x-contract-addresses",
+            "0x-contract-wrappers",
             "bandit",
             "black",
             "coverage",
@@ -159,6 +174,7 @@ setup(
             "pylint",
             "pytest",
             "sphinx",
+            "sphinx-autodoc-typehints",
             "tox",
             "twine",
         ]
@@ -195,6 +211,7 @@ setup(
         "build_sphinx": {
             "source_dir": ("setup.py", "src"),
             "build_dir": ("setup.py", "build/docs"),
+            "warning_is_error": ("setup.py", "true"),
         }
     },
 )

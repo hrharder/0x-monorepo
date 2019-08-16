@@ -1,6 +1,6 @@
 {
     "name": "@0x/dev-utils",
-    "version": "2.2.0",
+    "version": "2.3.0",
     "engines": {
         "node": ">=6.12"
     },
@@ -17,7 +17,8 @@
         "test:coverage": "nyc npm run test --all && yarn coverage:report:lcov",
         "coverage:report:lcov": "nyc report --reporter=text-lcov > coverage/lcov.info",
         "clean": "shx rm -rf lib",
-        "lint": "tslint --format stylish --project ."
+        "lint": "tslint --format stylish --project .",
+        "fix": "tslint --format stylish --fix --project ."
     },
     "license": "Apache-2.0",
     "repository": {
@@ -29,11 +30,11 @@
     },
     "homepage": "https://github.com/0xProject/0x-monorepo/packages/dev-utils/README.md",
     "devDependencies": {
-        "@0x/tslint-config": "^3.0.0",
+        "@0x/tslint-config": "^3.0.1",
         "@types/lodash": "4.14.104",
-        "@types/mocha": "^2.2.42",
+        "@types/mocha": "^5.2.7",
         "make-promises-safe": "^1.1.0",
-        "mocha": "^4.1.0",
+        "mocha": "^6.2.0",
         "npm-run-all": "^4.1.2",
         "nyc": "^11.0.1",
         "shx": "^0.2.2",
@@ -41,14 +42,14 @@
         "typescript": "3.0.1"
     },
     "dependencies": {
-        "@0x/subproviders": "^4.0.4",
-        "@0x/types": "^2.2.1",
-        "@0x/typescript-typings": "^4.2.1",
-        "@0x/utils": "^4.3.0",
-        "@0x/web3-wrapper": "^6.0.4",
+        "@0x/subproviders": "^5.0.1",
+        "@0x/types": "^2.4.1",
+        "@0x/typescript-typings": "^4.2.4",
+        "@0x/utils": "^4.5.0",
+        "@0x/web3-wrapper": "^6.0.10",
         "@types/web3-provider-engine": "^14.0.0",
         "chai": "^4.0.1",
-        "ethereum-types": "^2.1.1",
+        "ethereum-types": "^2.1.4",
         "lodash": "^4.17.11"
     },
     "publishConfig": {

@@ -20,7 +20,8 @@ class TestCommandExtension(TestCommand):
         """Invoke pytest."""
         import pytest
 
-        exit(pytest.main(["--doctest-modules"]))
+        exit(pytest.main(["--doctest-modules", "-rapP"]))
+        #        show short test summary at end ^
 
 
 class LintCommand(distutils.command.build_py.build_py):
@@ -131,11 +132,14 @@ with open("README.md", "r") as file_handle:
 
 setup(
     name="0x-middlewares",
-    version="1.0.1",
+    version="1.0.0",
     description="Web3 middlewares for 0x applications",
     long_description=README_MD,
     long_description_content_type="text/markdown",
-    url="https://github.com/0xproject/0x-monorepo/python-packages/middlewares",
+    url=(
+        "https://github.com/0xproject/0x-monorepo/tree/development"
+        "/python-packages/middlewares"
+    ),
     author="Michael Huang",
     author_email="michaelhly@users.noreply.github.com",
     cmdclass={
@@ -151,15 +155,14 @@ setup(
         "eth-account",
         "eth-keys",
         "hexbytes",
-        "hypothesis>=3.31.2",  # HACK! this is web3's dependency!
-        # above works around https://github.com/ethereum/web3.py/issues/1179
         "mypy_extensions",
     ],
     extras_require={
         "dev": [
             "0x-contract-addresses",
+            "0x-contract-wrappers",
             "0x-order-utils",
-            "0x-web3",
+            "web3",
             "bandit",
             "black",
             "coverage",
@@ -209,6 +212,7 @@ setup(
         "build_sphinx": {
             "source_dir": ("setup.py", "src"),
             "build_dir": ("setup.py", "build/docs"),
+            "warning_is_error": ("setup.py", "true"),
         }
     },
 )

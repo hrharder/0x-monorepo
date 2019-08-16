@@ -23,7 +23,7 @@ import {
 } from '@0x/contracts-test-utils';
 import { BlockchainLifecycle } from '@0x/dev-utils';
 import { assetDataUtils } from '@0x/order-utils';
-import { RevertReason } from '@0x/types';
+import { AssetProxyId, RevertReason } from '@0x/types';
 import { BigNumber } from '@0x/utils';
 import * as chai from 'chai';
 import { LogWithDecodedArgs } from 'ethereum-types';
@@ -31,6 +31,7 @@ import * as _ from 'lodash';
 
 import {
     artifacts,
+    ERC1155ProxyContract,
     ERC1155ProxyWrapper,
     ERC20ProxyContract,
     ERC20Wrapper,
@@ -44,16 +45,8 @@ import {
 chaiSetup.configure();
 const expect = chai.expect;
 const blockchainLifecycle = new BlockchainLifecycle(web3Wrapper);
-const assetProxyInterface = new IAssetProxyContract(
-    artifacts.IAssetProxy.compilerOutput.abi,
-    constants.NULL_ADDRESS,
-    provider,
-);
-const assetDataInterface = new IAssetDataContract(
-    artifacts.IAssetData.compilerOutput.abi,
-    constants.NULL_ADDRESS,
-    provider,
-);
+const assetProxyInterface = new IAssetProxyContract(constants.NULL_ADDRESS, provider);
+const assetDataInterface = new IAssetDataContract(constants.NULL_ADDRESS, provider);
 
 // tslint:disable:no-unnecessary-type-assertion
 describe('Asset Transfer Proxies', () => {
@@ -79,7 +72,7 @@ describe('Asset Transfer Proxies', () => {
     let erc721AFromTokenId: BigNumber;
     let erc721BFromTokenId: BigNumber;
 
-    let erc1155Proxy: ERC721ProxyContract;
+    let erc1155Proxy: ERC1155ProxyContract;
     let erc1155ProxyWrapper: ERC1155ProxyWrapper;
     let erc1155Contract: ERC1155MintableContract;
     let erc1155Contract2: ERC1155MintableContract;
@@ -108,75 +101,66 @@ describe('Asset Transfer Proxies', () => {
             artifacts.MultiAssetProxy,
             provider,
             txDefaults,
+            artifacts,
         );
 
         // Configure ERC20Proxy
-        await web3Wrapper.awaitTransactionSuccessAsync(
-            await erc20Proxy.addAuthorizedAddress.sendTransactionAsync(authorized, {
-                from: owner,
-            }),
+        await erc20Proxy.addAuthorizedAddress.awaitTransactionSuccessAsync(
+            authorized,
+            { from: owner },
             constants.AWAIT_TRANSACTION_MINED_MS,
         );
-        await web3Wrapper.awaitTransactionSuccessAsync(
-            await erc20Proxy.addAuthorizedAddress.sendTransactionAsync(multiAssetProxy.address, {
-                from: owner,
-            }),
+        await erc20Proxy.addAuthorizedAddress.awaitTransactionSuccessAsync(
+            multiAssetProxy.address,
+            { from: owner },
             constants.AWAIT_TRANSACTION_MINED_MS,
         );
 
         // Configure ERC721Proxy
-        await web3Wrapper.awaitTransactionSuccessAsync(
-            await erc721Proxy.addAuthorizedAddress.sendTransactionAsync(authorized, {
-                from: owner,
-            }),
+        await erc721Proxy.addAuthorizedAddress.awaitTransactionSuccessAsync(
+            authorized,
+            { from: owner },
             constants.AWAIT_TRANSACTION_MINED_MS,
         );
-        await web3Wrapper.awaitTransactionSuccessAsync(
-            await erc721Proxy.addAuthorizedAddress.sendTransactionAsync(multiAssetProxy.address, {
-                from: owner,
-            }),
+        await erc721Proxy.addAuthorizedAddress.awaitTransactionSuccessAsync(
+            multiAssetProxy.address,
+            { from: owner },
             constants.AWAIT_TRANSACTION_MINED_MS,
         );
 
         // Configure ERC115Proxy
         erc1155ProxyWrapper = new ERC1155ProxyWrapper(provider, usedAddresses, owner);
         erc1155Proxy = await erc1155ProxyWrapper.deployProxyAsync();
-        await web3Wrapper.awaitTransactionSuccessAsync(
-            await erc1155Proxy.addAuthorizedAddress.sendTransactionAsync(authorized, {
-                from: owner,
-            }),
+        await erc1155Proxy.addAuthorizedAddress.awaitTransactionSuccessAsync(
+            authorized,
+            { from: owner },
             constants.AWAIT_TRANSACTION_MINED_MS,
         );
-        await web3Wrapper.awaitTransactionSuccessAsync(
-            await erc1155Proxy.addAuthorizedAddress.sendTransactionAsync(multiAssetProxy.address, {
-                from: owner,
-            }),
+        await erc1155Proxy.addAuthorizedAddress.awaitTransactionSuccessAsync(
+            multiAssetProxy.address,
+            { from: owner },
             constants.AWAIT_TRANSACTION_MINED_MS,
         );
 
         // Configure MultiAssetProxy
-        await web3Wrapper.awaitTransactionSuccessAsync(
-            await multiAssetProxy.addAuthorizedAddress.sendTransactionAsync(authorized, {
-                from: owner,
-            }),
+        await multiAssetProxy.addAuthorizedAddress.awaitTransactionSuccessAsync(
+            authorized,
+            { from: owner },
             constants.AWAIT_TRANSACTION_MINED_MS,
         );
-        await web3Wrapper.awaitTransactionSuccessAsync(
-            await multiAssetProxy.registerAssetProxy.sendTransactionAsync(erc20Proxy.address, {
-                from: owner,
-            }),
+        await multiAssetProxy.registerAssetProxy.awaitTransactionSuccessAsync(
+            erc20Proxy.address,
+            { from: owner },
             constants.AWAIT_TRANSACTION_MINED_MS,
         );
-        await web3Wrapper.awaitTransactionSuccessAsync(
-            await multiAssetProxy.registerAssetProxy.sendTransactionAsync(erc721Proxy.address, {
-                from: owner,
-            }),
+        await multiAssetProxy.registerAssetProxy.awaitTransactionSuccessAsync(
+            erc721Proxy.address,
+            { from: owner },
             constants.AWAIT_TRANSACTION_MINED_MS,
         );
-        await web3Wrapper.awaitTransactionSuccessAsync(
-            await multiAssetProxy.registerAssetProxy.sendTransactionAsync(erc1155Proxy.address, {
-                from: owner,
-            }),
+        await multiAssetProxy.registerAssetProxy.awaitTransactionSuccessAsync(
+            erc1155Proxy.address,
+            { from: owner },
             constants.AWAIT_TRANSACTION_MINED_MS,
         );
 
@@ -190,6 +174,7 @@ describe('Asset Transfer Proxies', () => {
             erc20Artifacts.DummyNoReturnERC20Token,
             provider,
             txDefaults,
+            artifacts,
             constants.DUMMY_TOKEN_NAME,
             constants.DUMMY_TOKEN_SYMBOL,
             constants.DUMMY_TOKEN_DECIMALS,
@@ -199,6 +184,7 @@ describe('Asset Transfer Proxies', () => {
             erc20Artifacts.DummyMultipleReturnERC20Token,
             provider,
             txDefaults,
+            artifacts,
             constants.DUMMY_TOKEN_NAME,
             constants.DUMMY_TOKEN_SYMBOL,
             constants.DUMMY_TOKEN_DECIMALS,
@@ -206,31 +192,32 @@ describe('Asset Transfer Proxies', () => {
         );
 
         await erc20Wrapper.setBalancesAndAllowancesAsync();
-        await web3Wrapper.awaitTransactionSuccessAsync(
-            await noReturnErc20Token.setBalance.sendTransactionAsync(fromAddress, constants.INITIAL_ERC20_BALANCE),
+        await noReturnErc20Token.setBalance.awaitTransactionSuccessAsync(
+            fromAddress,
+            constants.INITIAL_ERC20_BALANCE,
+            {
+                from: owner,
+            },
             constants.AWAIT_TRANSACTION_MINED_MS,
         );
-        await web3Wrapper.awaitTransactionSuccessAsync(
-            await noReturnErc20Token.approve.sendTransactionAsync(
-                erc20Proxy.address,
-                constants.INITIAL_ERC20_ALLOWANCE,
-                { from: fromAddress },
-            ),
+        await noReturnErc20Token.approve.awaitTransactionSuccessAsync(
+            erc20Proxy.address,
+            constants.INITIAL_ERC20_ALLOWANCE,
+            { from: fromAddress },
             constants.AWAIT_TRANSACTION_MINED_MS,
         );
-        await web3Wrapper.awaitTransactionSuccessAsync(
-            await multipleReturnErc20Token.setBalance.sendTransactionAsync(
-                fromAddress,
-                constants.INITIAL_ERC20_BALANCE,
-            ),
+        await multipleReturnErc20Token.setBalance.awaitTransactionSuccessAsync(
+            fromAddress,
+            constants.INITIAL_ERC20_BALANCE,
+            {
+                from: owner,
+            },
             constants.AWAIT_TRANSACTION_MINED_MS,
         );
-        await web3Wrapper.awaitTransactionSuccessAsync(
-            await multipleReturnErc20Token.approve.sendTransactionAsync(
-                erc20Proxy.address,
-                constants.INITIAL_ERC20_ALLOWANCE,
-                { from: fromAddress },
-            ),
+        await multipleReturnErc20Token.approve.awaitTransactionSuccessAsync(
+            erc20Proxy.address,
+            constants.INITIAL_ERC20_ALLOWANCE,
+            { from: fromAddress },
             constants.AWAIT_TRANSACTION_MINED_MS,
         );
 
@@ -240,6 +227,7 @@ describe('Asset Transfer Proxies', () => {
             erc721Artifacts.DummyERC721Receiver,
             provider,
             txDefaults,
+            artifacts,
         );
 
         await erc721Wrapper.setBalancesAndAllowancesAsync();
@@ -419,10 +407,10 @@ describe('Asset Transfer Proxies', () => {
                     toAddress,
                     amount,
                 );
-                await web3Wrapper.awaitTransactionSuccessAsync(
-                    await erc20TokenA.approve.sendTransactionAsync(erc20Proxy.address, allowance, {
-                        from: fromAddress,
-                    }),
+                await erc20TokenA.approve.awaitTransactionSuccessAsync(
+                    erc20Proxy.address,
+                    allowance,
+                    { from: fromAddress },
                     constants.AWAIT_TRANSACTION_MINED_MS,
                 );
                 const erc20Balances = await erc20Wrapper.getBalancesAsync();
@@ -451,10 +439,10 @@ describe('Asset Transfer Proxies', () => {
                     toAddress,
                     amount,
                 );
-                await web3Wrapper.awaitTransactionSuccessAsync(
-                    await noReturnErc20Token.approve.sendTransactionAsync(erc20Proxy.address, allowance, {
-                        from: fromAddress,
-                    }),
+                await noReturnErc20Token.approve.awaitTransactionSuccessAsync(
+                    erc20Proxy.address,
+                    allowance,
+                    { from: fromAddress },
                     constants.AWAIT_TRANSACTION_MINED_MS,
                 );
                 const initialFromBalance = await noReturnErc20Token.balanceOf.callAsync(fromAddress);
@@ -692,10 +680,10 @@ describe('Asset Transfer Proxies', () => {
                 const ownerFromAsset = await erc721TokenA.ownerOf.callAsync(erc721AFromTokenId);
                 expect(ownerFromAsset).to.be.equal(fromAddress);
                 // Remove transfer approval for fromAddress.
-                await web3Wrapper.awaitTransactionSuccessAsync(
-                    await erc721TokenA.approve.sendTransactionAsync(constants.NULL_ADDRESS, erc721AFromTokenId, {
-                        from: fromAddress,
-                    }),
+                await erc721TokenA.approve.awaitTransactionSuccessAsync(
+                    constants.NULL_ADDRESS,
+                    erc721AFromTokenId,
+                    { from: fromAddress },
                     constants.AWAIT_TRANSACTION_MINED_MS,
                 );
                 // Perform a transfer; expect this to fail.
@@ -1346,7 +1334,7 @@ describe('Asset Transfer Proxies', () => {
                 const erc721AssetData = assetDataUtils.encodeERC721AssetData(erc721TokenA.address, erc721AFromTokenId);
                 const amounts = [erc20Amount, erc721Amount];
                 const nestedAssetData = [erc20AssetData, erc721AssetData];
-                const extraData = '0102030405060708';
+                const extraData = '0102030405060708090001020304050607080900010203040506070809000102';
                 const assetData = `${assetDataUtils.encodeMultiAssetData(amounts, nestedAssetData)}${extraData}`;
                 const data = assetProxyInterface.transferFrom.getABIEncodedTransactionData(
                     assetData,
@@ -1639,6 +1627,120 @@ describe('Asset Transfer Proxies', () => {
                         from: notAuthorized,
                     }),
                     RevertReason.SenderNotAuthorized,
+                );
+            });
+            it('should revert if asset data overflows beyond the bounds of calldata', async () => {
+                const inputAmount = new BigNumber(1);
+                const erc20Amount = new BigNumber(10);
+                const erc20AssetData = assetDataUtils.encodeERC20AssetData(erc20TokenA.address);
+                const erc721Amount = new BigNumber(1);
+                const erc721AssetData = assetDataUtils.encodeERC721AssetData(erc721TokenA.address, erc721AFromTokenId);
+                const amounts = [erc20Amount, erc721Amount];
+                const nestedAssetData = [erc20AssetData, erc721AssetData];
+                const assetData = assetDataUtils.encodeMultiAssetData(amounts, nestedAssetData);
+                const data = assetProxyInterface.transferFrom.getABIEncodedTransactionData(
+                    assetData,
+                    fromAddress,
+                    toAddress,
+                    inputAmount,
+                );
+                // append asset data to end of tx data with a length of 0x300 bytes, which will extend past actual calldata.
+                const offsetToAssetData = '0000000000000000000000000000000000000000000000000000000000000080';
+                const invalidOffsetToAssetData = '00000000000000000000000000000000000000000000000000000000000002a0';
+                const newAssetData = '0000000000000000000000000000000000000000000000000000000000000304';
+                const badData = `${data.replace(offsetToAssetData, invalidOffsetToAssetData)}${newAssetData}`;
+                // execute transfer
+                await expectTransactionFailedAsync(
+                    web3Wrapper.sendTransactionAsync({
+                        to: multiAssetProxy.address,
+                        data: badData,
+                        from: authorized,
+                    }),
+                    RevertReason.InvalidAssetDataEnd,
+                );
+            });
+            it('should revert if asset data resolves to a location beyond the bounds of calldata', async () => {
+                const inputAmount = new BigNumber(1);
+                const erc20Amount = new BigNumber(10);
+                const erc20AssetData = assetDataUtils.encodeERC20AssetData(erc20TokenA.address);
+                const erc721Amount = new BigNumber(1);
+                const erc721AssetData = assetDataUtils.encodeERC721AssetData(erc721TokenA.address, erc721AFromTokenId);
+                const amounts = [erc20Amount, erc721Amount];
+                const nestedAssetData = [erc20AssetData, erc721AssetData];
+                const assetData = assetDataUtils.encodeMultiAssetData(amounts, nestedAssetData);
+                const data = assetProxyInterface.transferFrom.getABIEncodedTransactionData(
+                    assetData,
+                    fromAddress,
+                    toAddress,
+                    inputAmount,
+                );
+                const offsetToAssetData = '0000000000000000000000000000000000000000000000000000000000000080';
+                const invalidOffsetToAssetData = '0000000000000000000000000000000000000000000000000000000000000400';
+                const badData = data.replace(offsetToAssetData, invalidOffsetToAssetData);
+                // execute transfer
+                // note that this triggers `InvalidAssetDataLength` because the length is zero, otherwise it would
+                // trigger `InvalidAssetDataEnd`.
+                await expectTransactionFailedAsync(
+                    web3Wrapper.sendTransactionAsync({
+                        to: multiAssetProxy.address,
+                        data: badData,
+                        from: authorized,
+                    }),
+                    RevertReason.InvalidAssetDataLength,
+                );
+            });
+            it('should revert if length of assetData, excluding the selector, is not a multiple of 32', async () => {
+                // setup test parameters
+                const inputAmount = new BigNumber(1);
+                const erc20Amount = new BigNumber(10);
+                const erc20AssetData = assetDataUtils.encodeERC20AssetData(erc20TokenA.address);
+                const erc721Amount = new BigNumber(1);
+                const erc721AssetData = assetDataUtils.encodeERC721AssetData(erc721TokenA.address, erc721AFromTokenId);
+                const amounts = [erc20Amount, erc721Amount];
+                const nestedAssetData = [erc20AssetData, erc721AssetData];
+                const assetData = assetDataUtils.encodeMultiAssetData(amounts, nestedAssetData);
+                const extraData = '01';
+                const assetDataWithExtraData = `${assetData}${extraData}`;
+                const badData = assetProxyInterface.transferFrom.getABIEncodedTransactionData(
+                    assetDataWithExtraData,
+                    fromAddress,
+                    toAddress,
+                    inputAmount,
+                );
+                // execute transfer
+                await expectTransactionFailedAsync(
+                    web3Wrapper.sendTransactionAsync({
+                        to: multiAssetProxy.address,
+                        data: badData,
+                        from: authorized,
+                    }),
+                    RevertReason.InvalidAssetDataLength,
+                );
+            });
+            it('should revert if length of assetData is less than 68 bytes', async () => {
+                // setup test parameters
+                const inputAmount = new BigNumber(1);
+                // we'll construct asset data that has a 4 byte selector plus
+                // 32 byte payload. This results in asset data that is 36 bytes
+                // long and will trigger the `invalid length` error.
+                // we must be sure to use a # of bytes that is still %32
+                // so that we know the error is not triggered by another check in the code.
+                const zeros32Bytes = '0'.repeat(64);
+                const assetData36Bytes = `${AssetProxyId.MultiAsset}${zeros32Bytes}`;
+                const badData = assetProxyInterface.transferFrom.getABIEncodedTransactionData(
+                    assetData36Bytes,
+                    fromAddress,
+                    toAddress,
+                    inputAmount,
+                );
+                // execute transfer
+                await expectTransactionFailedAsync(
+                    web3Wrapper.sendTransactionAsync({
+                        to: multiAssetProxy.address,
+                        data: badData,
+                        from: authorized,
+                    }),
+                    RevertReason.InvalidAssetDataLength,
                 );
             });
         });

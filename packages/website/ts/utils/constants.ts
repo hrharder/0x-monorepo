@@ -1,6 +1,7 @@
-import { ALink } from '@0x/react-shared';
 import { BigNumber } from '@0x/utils';
-import { Key, WebsitePaths } from 'ts/types';
+import { ALink, Key, Networks, WebsitePaths } from 'ts/types';
+
+import { SupportedDocJson } from '../types';
 
 const URL_FORUM = 'https://forum.0x.org';
 const URL_ZEROEX_CHAT = 'https://discord.gg/d3FTX3M';
@@ -105,7 +106,8 @@ export const constants = {
     URL_CANONICAL_WETH_POST: 'https://blog.0xproject.com/canonical-weth-a9aa7d0279dd',
     URL_ZEROEX_CHAT,
     URL_LAUNCH_KIT: 'https://github.com/0xProject/0x-launch-kit',
-    URL_LAUNCH_KIT_BLOG_POST: 'https://blog.0xproject.com/introducing-the-0x-launch-kit-4acdc3453585',
+    URL_LAUNCH_KIT_ERC20_DEMO: 'https://demo.0x.org/erc20/',
+    URL_LAUNCH_KIT_ERC721_DEMO: 'https://demo.0x.org/marketplace/',
     URL_WEB3_DOCS: 'https://github.com/ethereum/wiki/wiki/JavaScript-API',
     URL_WEB3_DECODED_LOG_ENTRY_EVENT:
         'https://github.com/0xProject/web3-typescript-typings/blob/f5bcb96/index.d.ts#L123',
@@ -113,6 +115,8 @@ export const constants = {
     URL_WEB3_PROVIDER_DOCS: 'https://github.com/0xProject/web3-typescript-typings/blob/f5bcb96/index.d.ts#L150',
     URL_BIGNUMBERJS_GITHUB: 'http://mikemcl.github.io/bignumber.js',
     URL_MISSION_AND_VALUES_BLOG_POST: 'https://blog.0xproject.com/the-0x-mission-and-values-181a58706f9f',
+    URL_VOTE_FAQ:
+        'https://blog.0xproject.com/vote-with-zrx-to-add-support-for-erc-1155-and-the-staticcallassetproxy-49a855807bcd#967f',
     DEVELOPER_TOPBAR_LINKS: [
         {
             title: Key.Wiki,
@@ -129,4 +133,25 @@ export const constants = {
             shouldOpenInNewTab: true,
         },
     ] as ALink[],
+    TYPES_SECTION_NAME: 'types',
+    EXTERNAL_EXPORTS_SECTION_NAME: 'external exports',
+    TYPE_TO_SYNTAX: {
+        [SupportedDocJson.SolDoc]: 'solidity',
+        [SupportedDocJson.TypeDoc]: 'typescript',
+    } as { [supportedDocType: string]: string },
+    DOCS_SCROLL_DURATION_MS: 0,
+    SCROLL_CONTAINER_ID: 'scroll_container',
+    SCROLL_TOP_ID: 'pageScrollTop',
+    NETWORK_NAME_BY_ID: {
+        1: Networks.Mainnet,
+        3: Networks.Ropsten,
+        4: Networks.Rinkeby,
+        42: Networks.Kovan,
+    } as { [symbol: number]: string },
+    NETWORK_ID_BY_NAME: {
+        [Networks.Mainnet]: 1,
+        [Networks.Ropsten]: 3,
+        [Networks.Rinkeby]: 4,
+        [Networks.Kovan]: 42,
+    } as { [networkName: string]: number },
 };

@@ -5,6 +5,50 @@ Edit the package's CHANGELOG.json file only.
 
 CHANGELOG
 
+## v3.0.5 - _August 8, 2019_
+
+    * Dependencies updated
+
+## v3.0.4 - _July 31, 2019_
+
+    * Updated calls to <contract wrapper>.deployFrom0xArtifactAsync to include artifact dependencies. (#1995)
+
+## v3.0.3 - _July 24, 2019_
+
+    * Dependencies updated
+
+## v3.0.2 - _July 15, 2019_
+
+    * Dependencies updated
+
+## v3.0.1 - _July 13, 2019_
+
+    * Dependencies updated
+
+## v3.0.0 - _July 13, 2019_
+
+    * Move `LibTransactionDecoder` to contracts/dev-utils package (#1848)
+
+## v2.1.6 - _May 24, 2019_
+
+    * Dependencies updated
+
+## v2.1.5 - _May 15, 2019_
+
+    * Dependencies updated
+
+## v2.1.4 - _May 14, 2019_
+
+    * Dependencies updated
+
+## v2.1.2 - _May 10, 2019_
+
+    * Dependencies updated
+
+## v2.1.1 - _April 11, 2019_
+
+    * Dependencies updated
+
 ## v2.1.0 - _March 21, 2019_
 
     * Run Web3ProviderEngine without excess block polling (#1695)

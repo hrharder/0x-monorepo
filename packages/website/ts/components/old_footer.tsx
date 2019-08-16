@@ -1,12 +1,14 @@
-import { ALink, colors, Link } from '@0x/react-shared';
+import { Link } from 'ts/components/documentation/shared/link';
+
 import { ObjectMap } from '@0x/types';
 import * as _ from 'lodash';
 import DropDownMenu from 'material-ui/DropDownMenu';
 import MenuItem from 'material-ui/MenuItem';
 import * as React from 'react';
+import { colors } from 'ts/style/colors';
 
 import { Dispatcher } from 'ts/redux/dispatcher';
-import { Deco, Key, Language, WebsitePaths } from 'ts/types';
+import { ALink, Deco, Key, Language, WebsitePaths } from 'ts/types';
 import { constants } from 'ts/utils/constants';
 import { Translate } from 'ts/utils/translate';
 
@@ -193,7 +195,7 @@ export class Footer extends React.Component<FooterProps, FooterState> {
                     className="text-decoration-none"
                 >
                     <div>
-                        {!_.isUndefined(iconIfExists) ? (
+                        {iconIfExists !== undefined ? (
                             <div className="inline-block">
                                 <div className="pr1 table-cell">{this._renderIcon(iconIfExists)}</div>
                                 <div className="table-cell">{link.title}</div>

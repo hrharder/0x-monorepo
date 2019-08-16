@@ -1,5 +1,4 @@
 import { assetDataUtils, generatePseudoRandomSalt, orderHashUtils } from '@0x/order-utils';
-import { colors } from '@0x/react-shared';
 import { Order as ZeroExOrder } from '@0x/types';
 import { BigNumber, logUtils } from '@0x/utils';
 import * as _ from 'lodash';
@@ -31,6 +30,7 @@ import {
     TokenByAddress,
 } from 'ts/types';
 import { analytics } from 'ts/utils/analytics';
+import { colors } from 'ts/utils/colors';
 import { constants } from 'ts/utils/constants';
 import { errorReporter } from 'ts/utils/error_reporter';
 import { utils } from 'ts/utils/utils';
@@ -266,8 +266,8 @@ export class GenerateOrderForm extends React.Component<GenerateOrderFormProps, G
         const receiveToken = this.props.sideToAssetToken[Side.Receive];
         const receiveAmount = receiveToken.amount;
         if (
-            !_.isUndefined(debitToken.amount) &&
-            !_.isUndefined(receiveAmount) &&
+            debitToken.amount !== undefined &&
+            receiveAmount !== undefined &&
             debitToken.amount.gt(0) &&
             receiveAmount.gt(0) &&
             this.props.userAddress !== '' &&
@@ -275,7 +275,7 @@ export class GenerateOrderForm extends React.Component<GenerateOrderFormProps, G
             debitAllowance.gte(debitToken.amount)
         ) {
             const signedOrder = await this._signTransactionAsync();
-            const doesSignedOrderExist = !_.isUndefined(signedOrder);
+            const doesSignedOrderExist = signedOrder !== undefined;
             if (doesSignedOrderExist) {
                 analytics.trackOrderEvent('Sign Order Success', signedOrder);
                 this.setState({
@@ -308,7 +308,7 @@ export class GenerateOrderForm extends React.Component<GenerateOrderFormProps, G
             signingState: SigningState.Signing,
         });
         const exchangeAddress = this.props.blockchain.getExchangeContractAddressIfExists();
-        if (_.isUndefined(exchangeAddress)) {
+        if (exchangeAddress === undefined) {
             this.props.dispatcher.updateShouldBlockchainErrDialogBeOpen(true);
             this.setState({
                 signingState: SigningState.Unsigned,
@@ -377,7 +377,7 @@ export class GenerateOrderForm extends React.Component<GenerateOrderFormProps, G
         return order;
     }
     private _updateOrderAddress(address?: string): void {
-        if (!_.isUndefined(address)) {
+        if (address !== undefined) {
             const normalizedAddress = _.isEmpty(address) ? constants.NULL_ADDRESS : address;
             this.props.dispatcher.updateOrderTakerAddress(normalizedAddress);
         }

@@ -5,6 +5,35 @@ Edit the package's CHANGELOG.json file only.
 
 CHANGELOG
 
+## v5.0.1 - _August 8, 2019_
+
+    * Dependencies updated
+
+## v5.0.0 - _July 31, 2019_
+
+    * Remove eth-lightwallet subprovider
+
+## v4.1.2 - _July 24, 2019_
+
+    * Fix bug in Private Key subprovider causing checksummed tx.origin addresses to be rejected. (#1962)
+
+## v4.1.1 - _July 13, 2019_
+
+    * Fix bug in Trezor subprovider causing Trezor response to not be hex encoded (#1867)
+
+## v4.1.0 - _May 24, 2019_
+
+    * Improve performance of Trezor subprovider via caching (#1830)
+    * Add Trezor handware wallet subprovider (#1431)
+
+## v4.0.6 - _May 10, 2019_
+
+    * Dependencies updated
+
+## v4.0.5 - _April 11, 2019_
+
+    * Dependencies updated
+
 ## v4.0.4 - _March 21, 2019_
 
     * Dependencies updated

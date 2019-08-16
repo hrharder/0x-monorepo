@@ -1,7 +1,6 @@
 import { LogDecoder, txDefaults } from '@0x/contracts-test-utils';
 import { Web3Wrapper } from '@0x/web3-wrapper';
 import { TransactionReceiptWithDecodedLogs, ZeroExProvider } from 'ethereum-types';
-import * as _ from 'lodash';
 
 import { artifacts, CoordinatorRegistryContract } from '../../src';
 
@@ -25,8 +24,9 @@ export class CoordinatorRegistryWrapper {
             artifacts.CoordinatorRegistry,
             this._provider,
             txDefaults,
+            artifacts,
         );
-        if (_.isUndefined(this._coordinatorRegistryContract)) {
+        if (this._coordinatorRegistryContract === undefined) {
             throw new Error(`Failed to deploy Coordinator Registry contract.`);
         }
         return this._coordinatorRegistryContract;
@@ -56,7 +56,7 @@ export class CoordinatorRegistryWrapper {
         return coordinatorEndpoint;
     }
     private _assertCoordinatorRegistryDeployed(): void {
-        if (_.isUndefined(this._coordinatorRegistryContract)) {
+        if (this._coordinatorRegistryContract === undefined) {
             throw new Error(
                 'The Coordinator Registry contract was not deployed through the CoordinatorRegistryWrapper. Call `deployCoordinatorRegistryAsync` to deploy.',
             );

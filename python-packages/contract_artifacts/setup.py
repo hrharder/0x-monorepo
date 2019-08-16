@@ -3,13 +3,43 @@
 """setuptools module for contract_artifacts package."""
 
 import subprocess  # nosec
-from shutil import rmtree
+from shutil import copytree, rmtree
 from os import environ, path
 from sys import argv
 
 from distutils.command.clean import clean
 import distutils.command.build_py
 from setuptools import find_packages, setup
+from setuptools.command.test import test as TestCommand
+
+
+class PreInstallCommand(distutils.command.build_py.build_py):
+    """Custom setuptools command class for pulling in artifacts."""
+
+    description = "Pull in the artifacts that live in the TypeScript package."
+
+    def run(self):
+        """Copy files from TS build area to local src, & `black` them."""
+        pkgdir = path.dirname(path.realpath(argv[0]))
+        rmtree(
+            path.join(
+                pkgdir, "src", "zero_ex", "contract_artifacts", "artifacts"
+            ),
+            ignore_errors=True,
+        )
+        copytree(
+            path.join(
+                pkgdir,
+                "..",
+                "..",
+                "packages",
+                "contract-artifacts",
+                "artifacts",
+            ),
+            path.join(
+                pkgdir, "src", "zero_ex", "contract_artifacts", "artifacts"
+            ),
+        )
 
 
 class LintCommand(distutils.command.build_py.build_py):
@@ -30,15 +60,6 @@ class LintCommand(distutils.command.build_py.build_py):
             "mypy src setup.py".split(),
             # security issue checker:
             "bandit -r src ./setup.py".split(),
-            # HACK: ensure contract artifacts match the authoritative copies:
-            # this is a hack.  ideally we would symlink to the authoritative
-            # copies, but a problem with setuptools is preventing it from
-            # following symlinks when gathering package_data.  see
-            # https://github.com/pypa/setuptools/issues/415.
-            (
-                "diff src/zero_ex/contract_artifacts/artifacts"
-                + " ../../packages/contract-artifacts/artifacts"
-            ).split(),
             # general linter:
             "pylint src setup.py".split(),
             # pylint takes relatively long to run, so it runs last, to enable
@@ -110,13 +131,24 @@ class PublishDocsCommand(distutils.command.build_py.build_py):
         subprocess.check_call("discharge deploy".split())  # nosec
 
 
+class TestCommandExtension(TestCommand):
+    """Run pytest tests."""
+
+    def run_tests(self):
+        """Invoke pytest."""
+        import pytest
+
+        exit(pytest.main(["--doctest-modules", "-rapP"]))
+        #        show short test summary at end ^
+
+
 with open("README.md", "r") as file_handle:
     README_MD = file_handle.read()
 
 
 setup(
     name="0x-contract-artifacts",
-    version="2.0.0",
+    version="2.0.1",
     description="0x smart contract compilation artifacts",
     long_description=README_MD,
     long_description_content_type="text/markdown",
@@ -127,8 +159,10 @@ setup(
     author="F. Eugene Aumson",
     author_email="feuGeneA@users.noreply.github.com",
     cmdclass={
+        "pre_install": PreInstallCommand,
         "clean": CleanCommandExtension,
         "lint": LintCommand,
+        "test": TestCommandExtension,
         "test_publish": TestPublishCommand,
         "publish": PublishCommand,
         "publish_docs": PublishDocsCommand,
@@ -183,6 +217,7 @@ setup(
         "build_sphinx": {
             "source_dir": ("setup.py", "src"),
             "build_dir": ("setup.py", "build/docs"),
+            "warning_is_error": ("setup.py", "true"),
         }
     },
 )

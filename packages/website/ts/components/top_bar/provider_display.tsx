@@ -1,4 +1,3 @@
-import { Styles } from '@0x/react-shared';
 import * as _ from 'lodash';
 import CircularProgress from 'material-ui/CircularProgress';
 import ActionAccountBalanceWallet from 'material-ui/svg-icons/action/account-balance-wallet';
@@ -20,7 +19,7 @@ import {
 import { Text } from 'ts/components/ui/text';
 import { Dispatcher } from 'ts/redux/dispatcher';
 import { colors } from 'ts/style/colors';
-import { AccountState, ProviderType } from 'ts/types';
+import { AccountState, ProviderType, Styles } from 'ts/types';
 import { utils } from 'ts/utils/utils';
 
 const ROOT_HEIGHT = 24;
@@ -141,7 +140,7 @@ export class ProviderDisplay extends React.Component<ProviderDisplayProps, Provi
         }
     }
     private _isBlockchainReady(): boolean {
-        return this.props.blockchainIsLoaded && !_.isUndefined(this.props.blockchain);
+        return this.props.blockchainIsLoaded && this.props.blockchain !== undefined;
     }
     private _getAccountState(): AccountState {
         return utils.getAccountState(

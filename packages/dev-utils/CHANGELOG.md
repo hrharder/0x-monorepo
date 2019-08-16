@@ -5,6 +5,34 @@ Edit the package's CHANGELOG.json file only.
 
 CHANGELOG
 
+## v2.3.0 - _August 8, 2019_
+
+    * Move `tokenUtils` here from `@0x/contract-wrappers` (#2037)
+
+## v2.2.6 - _July 31, 2019_
+
+    * Dependencies updated
+
+## v2.2.5 - _July 24, 2019_
+
+    * Dependencies updated
+
+## v2.2.4 - _July 13, 2019_
+
+    * Dependencies updated
+
+## v2.2.3 - _May 24, 2019_
+
+    * Dependencies updated
+
+## v2.2.2 - _May 10, 2019_
+
+    * Dependencies updated
+
+## v2.2.1 - _April 11, 2019_
+
+    * Dependencies updated
+
 ## v2.2.0 - _March 21, 2019_
 
     * Added `startProviderEngine` to `providerUtils`. Preventing excess block polling (#1695)

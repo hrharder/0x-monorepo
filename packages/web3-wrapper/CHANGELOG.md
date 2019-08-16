@@ -5,6 +5,30 @@ Edit the package's CHANGELOG.json file only.
 
 CHANGELOG
 
+## v6.0.10 - _August 8, 2019_
+
+    * Dependencies updated
+
+## v6.0.9 - _July 31, 2019_
+
+    * Dependencies updated
+
+## v6.0.8 - _July 24, 2019_
+
+    * re-export new ethereum-types types, TupleDataItem (#1919)
+
+## v6.0.7 - _July 13, 2019_
+
+    * Dependencies updated
+
+## v6.0.6 - _May 10, 2019_
+
+    * Dependencies updated
+
+## v6.0.5 - _April 11, 2019_
+
+    * Dependencies updated
+
 ## v6.0.4 - _March 21, 2019_
 
     * Dependencies updated

@@ -4,18 +4,23 @@ jobs:
     build:
         resource_class: medium+
         docker:
-            - image: circleci/node:9-browsers
+            - image: nikolaik/python-nodejs:python3.7-nodejs8
         environment:
             CONTRACTS_COMMIT_HASH: '9ed05f5'
         working_directory: ~/repo
         steps:
             - checkout
             - run: echo 'export PATH=$HOME/CIRCLE_PROJECT_REPONAME/node_modules/.bin:$PATH' >> $BASH_ENV
-            - run:
-                  # HACK(albrow): Without this, yarn commands will sometimes
-                  # fail with a "permission denied" error.
-                  name: Set npm path
-                  command: npm set prefix=/home/circleci/npm && echo 'export PATH=$HOME/circleci/npm/bin:$PATH' >> /home/circleci/.bashrc
+            # HACK(feuGeneA): commented out this hack as we're changing
+            # from a circleci-maintained container to a different
+            # container, and this hack may not apply anymore, as
+            # suggested by the non-existance of `/home/circleci/.bashrc`
+            # when running the command below.
+            # - run:
+            #       # HACK(albrow): Without this, yarn commands will sometimes
+            #       # fail with a "permission denied" error.
+            #       name: Set npm path
+            #       command: npm set prefix=/home/circleci/npm && echo 'export PATH=$HOME/circleci/npm/bin:$PATH' >> /home/circleci/.bashrc
             - run:
                   name: install-yarn
                   command: npm install --global yarn@1.9.4
@@ -29,10 +34,20 @@ jobs:
                   key: repo-{{ .Environment.CIRCLE_SHA1 }}
                   paths:
                       - ~/repo
+            - save_cache:
+                  key: python-contract-wrappers-{{ .Environment.CIRCLE_SHA1 }}
+                  paths:
+                      - ~/repo/packages/python-contract-wrappers/generated
+            - store_artifacts:
+                  path: ~/repo/packages/python-contract-wrappers/generated
+            - store_artifacts:
+                  path: ~/repo/packages/abi-gen/test-cli/output
+            - store_artifacts:
+                  path: ~/repo/packages/abi-gen-wrappers/generated_docs
     build-website:
         resource_class: medium+
         docker:
-            - image: circleci/node:9-browsers
+            - image: nikolaik/python-nodejs:python3.7-nodejs8
         working_directory: ~/repo
         steps:
             - restore_cache:
@@ -40,27 +55,18 @@ jobs:
                       - repo-{{ .Environment.CIRCLE_SHA1 }}
             - run: cd packages/website && yarn build:prod
     test-contracts-ganache:
+        resource_class: medium+
         docker:
-            - image: circleci/node:9-browsers
+            - image: nikolaik/python-nodejs:python3.7-nodejs8
         working_directory: ~/repo
         steps:
             - restore_cache:
                   keys:
                       - repo-{{ .Environment.CIRCLE_SHA1 }}
-            - run: yarn wsrun test:circleci @0x/contracts-multisig
-            - run: yarn wsrun test:circleci @0x/contracts-utils
-            - run: yarn wsrun test:circleci @0x/contracts-exchange-libs
-            - run: yarn wsrun test:circleci @0x/contracts-erc20
-            - run: yarn wsrun test:circleci @0x/contracts-erc721
-            - run: yarn wsrun test:circleci @0x/contracts-erc1155
-            - run: yarn wsrun test:circleci @0x/contracts-extensions
-            - run: yarn wsrun test:circleci @0x/contracts-asset-proxy
-            - run: yarn wsrun test:circleci @0x/contracts-exchange
-            - run: yarn wsrun test:circleci @0x/contracts-exchange-forwarder
-            - run: yarn wsrun test:circleci @0x/contracts-coordinator
+            - run: yarn wsrun test:circleci @0x/contracts-multisig @0x/contracts-utils @0x/contracts-exchange-libs @0x/contracts-erc20 @0x/contracts-erc721 @0x/contracts-erc1155 @0x/contracts-extensions @0x/contracts-asset-proxy @0x/contracts-exchange @0x/contracts-exchange-forwarder @0x/contracts-coordinator @0x/contracts-dev-utils
     test-contracts-geth:
         docker:
-            - image: circleci/node:9-browsers
+            - image: nikolaik/python-nodejs:python3.7-nodejs8
             - image: 0xorg/devnet
         working_directory: ~/repo
         steps:
@@ -69,21 +75,11 @@ jobs:
                       - repo-{{ .Environment.CIRCLE_SHA1 }}
             # HACK(albrow): we need to sleep 10 seconds to ensure the devnet is
             # initialized
-            - run: sleep 10 && TEST_PROVIDER=geth yarn wsrun test @0x/contracts-multisig
-            - run: TEST_PROVIDER=geth yarn wsrun test:circleci @0x/contracts-utils
-            - run: TEST_PROVIDER=geth yarn wsrun test:circleci @0x/contracts-exchange-libs
-            - run: TEST_PROVIDER=geth yarn wsrun test:circleci @0x/contracts-erc20
-            - run: TEST_PROVIDER=geth yarn wsrun test:circleci @0x/contracts-erc721
-            - run: TEST_PROVIDER=geth yarn wsrun test:circleci @0x/contracts-erc1155
-            - run: TEST_PROVIDER=geth yarn wsrun test:circleci @0x/contracts-extensions
-            - run: TEST_PROVIDER=geth yarn wsrun test:circleci @0x/contracts-asset-proxy
-            - run: TEST_PROVIDER=geth yarn wsrun test:circleci @0x/contracts-exchange
-            - run: TEST_PROVIDER=geth yarn wsrun test:circleci @0x/contracts-exchange-forwarder
-            - run: TEST_PROVIDER=geth yarn wsrun test:circleci @0x/contracts-coordinator
+            - run: sleep 10 && TEST_PROVIDER=geth yarn wsrun test:circleci @0x/contracts-multisig @0x/contracts-utils @0x/contracts-exchange-libs @0x/contracts-erc20 @0x/contracts-erc721 @0x/contracts-erc1155 @0x/contracts-extensions @0x/contracts-asset-proxy @0x/contracts-exchange @0x/contracts-exchange-forwarder @0x/contracts-coordinator @0x/contracts-dev-utils
     test-publish:
         resource_class: medium+
         docker:
-            - image: circleci/node:9-browsers
+            - image: nikolaik/python-nodejs:python3.7-nodejs8
             - image: 0xorg/verdaccio
         working_directory: ~/repo
         steps:
@@ -93,30 +89,16 @@ jobs:
             - run: yarn test:publish:circleci
     test-doc-generation:
         docker:
-            - image: circleci/node:9-browsers
+            - image: nikolaik/python-nodejs:python3.7-nodejs8
         working_directory: ~/repo
         steps:
             - restore_cache:
                   keys:
                       - repo-{{ .Environment.CIRCLE_SHA1 }}
             - run: yarn test:generate_docs:circleci
-    test-pipeline:
-        docker:
-            - image: circleci/node:9
-            - image: postgres:11-alpine
-        working_directory: ~/repo
-        steps:
-            - restore_cache:
-                  keys:
-                      - repo-{{ .Environment.CIRCLE_SHA1 }}
-            - run: ZEROEX_DATA_PIPELINE_TEST_DB_URL='postgresql://postgres@localhost/postgres' yarn wsrun test:circleci @0x/pipeline
-            - save_cache:
-                  key: coverage-pipeline-{{ .Environment.CIRCLE_SHA1 }}
-                  paths:
-                      - ~/repo/packages/pipeline/coverage/lcov.info
     test-rest:
         docker:
-            - image: circleci/node:9-browsers
+            - image: nikolaik/python-nodejs:python3.7-nodejs8
         working_directory: ~/repo
         steps:
             - restore_cache:
@@ -124,6 +106,7 @@ jobs:
                       - repo-{{ .Environment.CIRCLE_SHA1 }}
             - run: yarn wsrun test:circleci @0x/contracts-test-utils
             - run: yarn wsrun test:circleci @0x/abi-gen
+            - run: yarn wsrun test:circleci @0x/asset-buyer
             - run: yarn wsrun test:circleci @0x/contract-artifacts
             - run: yarn wsrun test:circleci @0x/assert
             - run: yarn wsrun test:circleci @0x/base-contract
@@ -131,9 +114,7 @@ jobs:
             - run: yarn wsrun test:circleci @0x/contract-wrappers
             - run: yarn wsrun test:circleci @0x/dev-utils
             - run: yarn wsrun test:circleci @0x/json-schemas
-            - run: yarn wsrun test:circleci @0x/metacoin
             - run: yarn wsrun test:circleci @0x/order-utils
-            - run: yarn wsrun test:circleci @0x/order-watcher
             - run: yarn wsrun test:circleci @0x/sol-compiler
             - run: yarn wsrun test:circleci @0x/sol-tracing-utils
             - run: yarn wsrun test:circleci @0x/sol-doc
@@ -149,6 +130,10 @@ jobs:
                   key: coverage-assert-{{ .Environment.CIRCLE_SHA1 }}
                   paths:
                       - ~/repo/packages/assert/coverage/lcov.info
+            - save_cache:
+                  key: coverage-asset-buyer-{{ .Environment.CIRCLE_SHA1 }}
+                  paths:
+                      - ~/repo/packages/asset-buyer/coverage/lcov.info
             - save_cache:
                   key: coverage-base-contract-{{ .Environment.CIRCLE_SHA1 }}
                   paths:
@@ -170,17 +155,9 @@ jobs:
                   paths:
                       - ~/repo/packages/json-schemas/coverage/lcov.info
             - save_cache:
-                  key: coverage-metacoin-{{ .Environment.CIRCLE_SHA1 }}
-                  paths:
-                      - ~/repo/packages/metacoin/coverage/lcov.info
-            - save_cache:
                   key: coverage-order-utils-{{ .Environment.CIRCLE_SHA1 }}
                   paths:
                       - ~/repo/packages/order-utils/coverage/lcov.info
-            - save_cache:
-                  key: coverage-order-watcher-{{ .Environment.CIRCLE_SHA1 }}
-                  paths:
-                      - ~/repo/packages/order-watcher/coverage/lcov.info
             - save_cache:
                   key: coverage-sol-compiler-{{ .Environment.CIRCLE_SHA1 }}
                   paths:
@@ -204,34 +181,37 @@ jobs:
     test-python:
         working_directory: ~/repo
         docker:
-            - image: circleci/python
+            - image: nikolaik/python-nodejs:python3.7-nodejs8
             - image: 0xorg/ganache-cli:2.2.2
-            - image: 0xorg/launch-kit-ci
+            - image: 0xorg/launch-kit-backend:74bcc39
               environment:
                   RPC_URL: http://localhost:8545
                   NETWORK_ID: 50
                   WHITELIST_ALL_TOKENS: True
-              command: bash -c "until curl -sfd'{\"method\":\"net_listening\"}' http://localhost:8545 | grep true; do continue; done; forever ts/lib/index.js"
+              command: |
+                  sh -c "until printf 'POST /\r\nContent-Length: 26\r\n\r\n{\"method\":\"net_listening\"}' | nc localhost 8545 | grep true; do continue; done; node_modules/.bin/forever ts/lib/index.js"
         steps:
             - checkout
-            - run: sudo chown -R circleci:circleci /usr/local/bin
-            - run: sudo chown -R circleci:circleci /usr/local/lib/python3.7
             - restore_cache:
-                  key: deps9-{{ .Branch }}-{{ .Environment.CIRCLE_SHA1 }}
+                  key: installed-py-{{ .Branch }}-{{ .Environment.CIRCLE_SHA1 }}
+            - restore_cache:
+                  key: python-contract-wrappers-{{ .Environment.CIRCLE_SHA1 }}
             - run:
                   command: |
                       cd python-packages
                       python -m ensurepip
+                      ./pre_install
                       ./install
             - save_cache:
-                  key: deps9-{{ .Branch }}-{{ .Environment.CIRCLE_SHA1 }}
+                  key: installed-py-{{ .Branch }}-{{ .Environment.CIRCLE_SHA1 }}
                   paths:
                       - '/usr/local/bin'
                       - '/usr/local/lib/python3.7/site-packages'
             - run:
                   command: |
                       cd python-packages
-                      ./cmd_pkgs_in_dep_order.py coverage run setup.py test
+                      ./parallel_without_sra_client coverage run setup.py test
+                      ./build_docs
             - save_cache:
                   key: coverage-python-contract-addresses-{{ .Environment.CIRCLE_SHA1 }}
                   paths:
@@ -256,23 +236,39 @@ jobs:
                   key: coverage-python-sra-client-{{ .Environment.CIRCLE_SHA1 }}
                   paths:
                       - ~/repo/python-packages/sra_client/.coverage
+            - store_artifacts:
+                  path: ~/repo/python-packages/contract_wrappers/src/zero_ex/contract_wrappers/erc20_token/__init__.py
+            - store_artifacts:
+                  path: ~/repo/python-packages/contract_wrappers/src/zero_ex/contract_wrappers/exchange/__init__.py
+            - store_artifacts:
+                  path: ~/repo/python-packages/contract_addresses/build
+            - store_artifacts:
+                  path: ~/repo/python-packages/contract_artifacts/build
+            - store_artifacts:
+                  path: ~/repo/python-packages/contract_wrappers/build
+            - store_artifacts:
+                  path: ~/repo/python-packages/json_schemas/build
+            - store_artifacts:
+                  path: ~/repo/python-packages/middlewares/build
+            - store_artifacts:
+                  path: ~/repo/python-packages/order_utils/build
+            - store_artifacts:
+                  path: ~/repo/python-packages/sra_client/build
     test-rest-python:
         working_directory: ~/repo
         docker:
-            - image: circleci/python
+            - image: nikolaik/python-nodejs:python3.7-nodejs8
         steps:
             - checkout
-            - run: sudo chown -R circleci:circleci /usr/local/bin
-            - run: sudo chown -R circleci:circleci /usr/local/lib/python3.7
             - restore_cache:
-                  key: deps9-{{ .Branch }}-{{ .Environment.CIRCLE_SHA1 }}
+                  key: installed-py-{{ .Branch }}-{{ .Environment.CIRCLE_SHA1 }}
             - run:
                   command: |
                       cd python-packages/order_utils
                       python -m ensurepip
                       python -m pip install .
             - save_cache:
-                  key: deps9-{{ .Branch }}-{{ .Environment.CIRCLE_SHA1 }}
+                  key: installed-py-{{ .Branch }}-{{ .Environment.CIRCLE_SHA1 }}
                   paths:
                       - '/usr/local/bin'
                       - '/usr/local/lib/python3.7/site-packages'
@@ -287,23 +283,24 @@ jobs:
     static-tests-python:
         working_directory: ~/repo
         docker:
-            - image: circleci/python
+            - image: nikolaik/python-nodejs:python3.7-nodejs8
         steps:
             - checkout
-            - run: sudo chown -R circleci:circleci /usr/local/bin
-            - run: sudo chown -R circleci:circleci /usr/local/lib/python3.7
             - restore_cache:
-                  key: deps9-{{ .Branch }}-{{ .Environment.CIRCLE_SHA1 }}
+                  key: installed-py-{{ .Branch }}-{{ .Environment.CIRCLE_SHA1 }}
+            - restore_cache:
+                  key: python-contract-wrappers-{{ .Environment.CIRCLE_SHA1 }}
             - run:
                   command: |
                       python -m ensurepip
                       cd python-packages
+                      ./pre_install
                       ./install
                       ./lint
     static-tests:
         working_directory: ~/repo
         docker:
-            - image: circleci/node:9-browsers
+            - image: nikolaik/python-nodejs:python3.7-nodejs8
         steps:
             - restore_cache:
                   keys:
@@ -315,7 +312,7 @@ jobs:
             - run: yarn bundlewatch
     submit-coverage:
         docker:
-            - image: circleci/node:9-browsers
+            - image: nikolaik/python-nodejs:python3.7-nodejs8
         working_directory: ~/repo
         steps:
             - restore_cache:
@@ -327,6 +324,9 @@ jobs:
             - restore_cache:
                   keys:
                       - coverage-assert-{{ .Environment.CIRCLE_SHA1 }}
+            - restore_cache:
+                  keys:
+                      - coverage-asset-buyer-{{ .Environment.CIRCLE_SHA1 }}
             - restore_cache:
                   keys:
                       - coverage-base-contract-{{ .Environment.CIRCLE_SHA1 }}
@@ -344,13 +344,7 @@ jobs:
                       - coverage-json-schemas-{{ .Environment.CIRCLE_SHA1 }}
             - restore_cache:
                   keys:
-                      - coverage-metacoin-{{ .Environment.CIRCLE_SHA1 }}
-            - restore_cache:
-                  keys:
                       - coverage-order-utils-{{ .Environment.CIRCLE_SHA1 }}
-            - restore_cache:
-                  keys:
-                      - coverage-order-watcher-{{ .Environment.CIRCLE_SHA1 }}
             - restore_cache:
                   keys:
                       - coverage-sol-compiler-{{ .Environment.CIRCLE_SHA1 }}
@@ -404,9 +398,6 @@ workflows:
             # - test-contracts-geth:
             #       requires:
             #           - build
-            - test-pipeline:
-                  requires:
-                      - build
             - test-rest:
                   requires:
                       - build
@@ -426,6 +417,8 @@ workflows:
             - static-tests-python:
                   requires:
                       - test-python
-            - test-python
+            - test-python:
+                  requires:
+                      - build
             # skip python tox run for now, as we don't yet have multiple test environments to support.
             #- test-rest-python

@@ -2,10 +2,13 @@
 
 import { PackageJSON } from '@0x/types';
 import { logUtils } from '@0x/utils';
+import { spawn } from 'child_process';
 import * as promisify from 'es6-promisify';
+import * as fs from 'fs';
 import * as _ from 'lodash';
 import * as moment from 'moment';
 import opn = require('opn');
+import * as path from 'path';
 import { exec as execAsync, spawn as spawnAsync } from 'promisify-child-process';
 import * as prompt from 'prompt';
 import semver = require('semver');
@@ -61,7 +64,7 @@ async function confirmAsync(message: string): Promise<void> {
         const currentVersion = pkg.packageJson.version;
         const packageName = pkg.packageJson.name;
         const nextPatchVersionIfValid = semver.inc(currentVersion, 'patch');
-        if (!_.isNull(nextPatchVersionIfValid)) {
+        if (nextPatchVersionIfValid !== null) {
             packageToNextVersion[packageName] = nextPatchVersionIfValid;
         } else {
             throw new Error(`Encountered invalid semver version: ${currentVersion} for package: ${packageName}`);
@@ -110,9 +113,9 @@ async function publishImagesToDockerHubAsync(allUpdatedPackages: Package[]): Pro
     for (const pkg of allUpdatedPackages) {
         const packageJSON = pkg.packageJson;
         const shouldPublishDockerImage =
-            !_.isUndefined(packageJSON.config) &&
-            !_.isUndefined(packageJSON.config.postpublish) &&
-            !_.isUndefined(packageJSON.config.postpublish.dockerHubRepo);
+            packageJSON.config !== undefined &&
+            packageJSON.config.postpublish !== undefined &&
+            packageJSON.config.postpublish.dockerHubRepo !== undefined;
         if (!shouldPublishDockerImage) {
             continue;
         }
@@ -143,7 +146,7 @@ function getPackagesWithDocs(allUpdatedPackages: Package[]): Package[] {
     const rootPackageJsonPath = `${constants.monorepoRootPath}/package.json`;
     const rootPackageJSON = utils.readJSONFile<PackageJSON>(rootPackageJsonPath);
     const packagesWithDocPagesStringIfExist = _.get(rootPackageJSON, 'config.packagesWithDocPages', undefined);
-    if (_.isUndefined(packagesWithDocPagesStringIfExist)) {
+    if (packagesWithDocPagesStringIfExist === undefined) {
         return []; // None to generate & publish
     }
     const packagesWithDocPages = packagesWithDocPagesStringIfExist.split(' ');
@@ -214,7 +217,7 @@ async function updateChangeLogsAsync(updatedPublicPackages: Package[]): Promise<
         if (shouldAddNewEntry) {
             // Create a new entry for a patch version with generic changelog entry.
             const nextPatchVersionIfValid = semver.inc(currentVersion, 'patch');
-            if (_.isNull(nextPatchVersionIfValid)) {
+            if (nextPatchVersionIfValid === null) {
                 throw new Error(`Encountered invalid semver version: ${currentVersion} for package: ${packageName}`);
             }
             const newChangelogEntry: VersionChangelog = {
@@ -231,7 +234,7 @@ async function updateChangeLogsAsync(updatedPublicPackages: Package[]): Promise<
         } else {
             // Update existing entry with timestamp
             const lastEntry = changelog[0];
-            if (_.isUndefined(lastEntry.timestamp)) {
+            if (lastEntry.timestamp === undefined) {
                 lastEntry.timestamp = TODAYS_TIMESTAMP;
             }
             // Check version number is correct.
@@ -254,22 +257,65 @@ async function updateChangeLogsAsync(updatedPublicPackages: Package[]): Promise<
 }
 
 async function lernaPublishAsync(packageToNextVersion: { [name: string]: string }): Promise<void> {
-    const packageVersionString = _.map(packageToNextVersion, (nextVersion: string, packageName: string) => {
-        return `${packageName}@${nextVersion}`;
-    }).join(',');
-    let lernaPublishCmd = `node ${constants.lernaExecutable} publish --cdVersions=${packageVersionString} --registry=${
-        configs.NPM_REGISTRY_URL
-    } --yes`;
-    if (configs.IS_LOCAL_PUBLISH) {
-        lernaPublishCmd += ` --skip-git`;
-    }
-    utils.log('Lerna is publishing...');
-    await execAsync(lernaPublishCmd, { cwd: constants.monorepoRootPath });
+    return new Promise<void>((resolve, reject) => {
+        const packageVersionString = _.map(packageToNextVersion, (nextVersion: string, packageName: string) => {
+            return `${packageName}|${nextVersion}`;
+        }).join(',');
+        // HACK(fabio): Previously we would pass the packageVersionString directly to `lerna publish` using the
+        // `--cdVersions` flag. Since we now need to use `spawn` instead of `exec` when calling Lerna, passing
+        // them as a string arg is causing `spawn` to error with `ENAMETOOLONG`. In order to shorten the args
+        // passed to `spawn` we now write the new version to a file and pass the filepath to the `cdVersions` arg.
+        const cdVersionsFilepath = path.join(__dirname, 'cd_versions.txt');
+        fs.writeFileSync(cdVersionsFilepath, packageVersionString);
+        const lernaPublishCmd = `node`;
+        const lernaPublishArgs = [
+            `${constants.lernaExecutable}`,
+            'publish',
+            `--cdVersions=${cdVersionsFilepath}`,
+            `--registry=${configs.NPM_REGISTRY_URL}`,
+            `--yes`,
+        ];
+        if (configs.IS_LOCAL_PUBLISH) {
+            lernaPublishArgs.push('--no-git-tag-version');
+            lernaPublishArgs.push('--no-push');
+        }
+        utils.log('Lerna is publishing...');
+        try {
+            const child = spawn(lernaPublishCmd, lernaPublishArgs, {
+                cwd: constants.monorepoRootPath,
+            });
+            child.stdout.on('data', async (data: Buffer) => {
+                const output = data.toString('utf8');
+                utils.log('Lerna publish cmd: ', output);
+                const isOTPPrompt = _.includes(output, 'Enter OTP:');
+                if (isOTPPrompt) {
+                    // Prompt for OTP
+                    prompt.start();
+                    const result = await promisify(prompt.get)(['OTP']);
+                    child.stdin.write(`${result.OTP}\n`);
+                }
+                const didFinishPublishing = _.includes(output, 'Successfully published:');
+                if (didFinishPublishing) {
+                    // Remove temporary cdVersions file
+                    fs.unlinkSync(cdVersionsFilepath);
+                    resolve();
+                }
+            });
+            child.stderr.on('data', (data: Buffer) => {
+                const output = data.toString('utf8');
+                utils.log('Lerna publish cmd: ', output);
+            });
+        } catch (err) {
+            // Remove temporary cdVersions file
+            fs.unlinkSync(cdVersionsFilepath);
+            reject(err);
+        }
+    });
 }
 
 function updateVersionNumberIfNeeded(currentVersion: string, proposedNextVersion: string): string {
     const updatedVersionIfValid = semver.inc(currentVersion, 'patch');
-    if (_.isNull(updatedVersionIfValid)) {
+    if (updatedVersionIfValid === null) {
         throw new Error(`Encountered invalid semver: ${currentVersion}`);
     }
     if (proposedNextVersion === currentVersion) {

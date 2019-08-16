@@ -26,10 +26,13 @@ import { Explore } from 'ts/pages/explore';
 import { NextEcosystem } from 'ts/pages/ecosystem';
 import { Extensions } from 'ts/pages/extensions';
 import { Governance } from 'ts/pages/governance/governance';
+import { VoteIndex } from 'ts/pages/governance/vote_index';
 import { Next0xInstant } from 'ts/pages/instant';
 import { NextLanding } from 'ts/pages/landing';
 import { NextLaunchKit } from 'ts/pages/launch_kit';
 import { NextMarketMaker } from 'ts/pages/market_maker';
+import { PrivacyPolicy } from 'ts/pages/privacy';
+import { TermsOfService } from 'ts/pages/terms';
 import { NextWhy } from 'ts/pages/why';
 
 // Check if we've introduced an update that requires us to clear the tradeHistory local storage entries
@@ -37,6 +40,7 @@ tradeHistoryStorage.clearIfRequired();
 trackedTokenStorage.clearIfRequired();
 
 import 'less/all.less';
+import 'sass/modal_video.scss';
 
 // We pass modulePromise returning lambda instead of module promise,
 // cause we only want to import the module when the user navigates to the page.
@@ -54,9 +58,6 @@ const LazyContractWrappersDocumentation = createLazyComponent('Documentation', a
 );
 const LazyMigrationsDocumentation = createLazyComponent('Documentation', async () =>
     import(/* webpackChunkName: "migrationsDocs" */ 'ts/containers/migrations_documentation'),
-);
-const LazyOrderWatcherDocumentation = createLazyComponent('Documentation', async () =>
-    import(/* webpackChunkName: "orderWatcherDocs" */ 'ts/containers/order_watcher_documentation'),
 );
 const LazySmartContractsDocumentation = createLazyComponent('Documentation', async () =>
     import(/* webpackChunkName: "smartContractDocs" */ 'ts/containers/smart_contracts_documentation'),
@@ -94,6 +95,9 @@ const LazyEthereumTypesDocumentation = createLazyComponent('Documentation', asyn
 const LazyAssetBuyerDocumentation = createLazyComponent('Documentation', async () =>
     import(/* webpackChunkName: "assetBuyerDocs" */ 'ts/containers/asset_buyer_documentation'),
 );
+const LazyAssetSwapperDocumentation = createLazyComponent('Documentation', async () =>
+    import(/* webpackChunkName: "assetSwapperDocs" */ 'ts/containers/asset_swapper_documentation'),
+);
 
 const DOCUMENT_TITLE = '0x: The Protocol for Trading Tokens';
 const DOCUMENT_DESCRIPTION = 'An Open Protocol For Decentralized Exchange On The Ethereum Blockchain';
@@ -120,8 +124,19 @@ render(
                                 <Route exact={true} path={WebsitePaths.Instant} component={Next0xInstant as any} />
                                 <Route exact={true} path={WebsitePaths.LaunchKit} component={NextLaunchKit as any} />
                                 <Route exact={true} path={WebsitePaths.Ecosystem} component={NextEcosystem as any} />
-                                <Route exact={true} path={WebsitePaths.Vote} component={Governance as any} />
+                                <Route exact={true} path={`${WebsitePaths.Vote}/:zeip`} component={Governance as any} />
+                                <Route exact={true} path={WebsitePaths.Vote} component={VoteIndex as any} />
                                 <Route exact={true} path={WebsitePaths.Extensions} component={Extensions as any} />
+                                <Route
+                                    exact={true}
+                                    path={WebsitePaths.PrivacyPolicy}
+                                    component={PrivacyPolicy as any}
+                                />
+                                <Route
+                                    exact={true}
+                                    path={WebsitePaths.TermsOfService}
+                                    component={TermsOfService as any}
+                                />
                                 <Route
                                     exact={true}
                                     path={WebsitePaths.AboutMission}
@@ -149,10 +164,6 @@ render(
                                 <Route
                                     path={`${WebsitePaths.Migrations}/:version?`}
                                     component={LazyMigrationsDocumentation}
-                                />
-                                <Route
-                                    path={`${WebsitePaths.OrderWatcher}/:version?`}
-                                    component={LazyOrderWatcherDocumentation}
                                 />
                                 <Route
                                     path={`${WebsitePaths.Connect}/:version?`}
@@ -201,6 +212,10 @@ render(
                                 <Route
                                     path={`${WebsitePaths.AssetBuyer}/:version?`}
                                     component={LazyAssetBuyerDocumentation}
+                                />
+                                <Route
+                                    path={`${WebsitePaths.AssetSwapper}/:version?`}
+                                    component={LazyAssetSwapperDocumentation}
                                 />
                                 <Route path={WebsitePaths.Docs} component={DocsHome as any} />
                                 {/* Legacy endpoints */}

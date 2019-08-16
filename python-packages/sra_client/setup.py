@@ -5,6 +5,8 @@
 
 import subprocess  # nosec
 import distutils.command.build_py
+from distutils.command.clean import clean
+from shutil import rmtree
 from urllib.request import urlopen
 from urllib.error import URLError
 
@@ -12,7 +14,7 @@ from setuptools import setup, find_packages  # noqa: H301
 from setuptools.command.test import test as TestCommand
 
 NAME = "0x-sra-client"
-VERSION = "1.0.1"
+VERSION = "3.0.0"
 # To install the library, run the following
 #
 # python setup.py install
@@ -26,6 +28,21 @@ with open("README.md", "r") as file_handle:
 REQUIRES = ["urllib3 >= 1.15", "six >= 1.10", "certifi", "python-dateutil"]
 
 
+class CleanCommandExtension(clean):
+    """Custom command to do custom cleanup."""
+
+    def run(self):
+        """Run the regular clean, followed by our custom commands."""
+        super().run()
+        rmtree("__pycache__", ignore_errors=True)
+        rmtree(".mypy_cache", ignore_errors=True)
+        rmtree(".tox", ignore_errors=True)
+        rmtree(".pytest_cache", ignore_errors=True)
+        rmtree("0x_sra_client.egg-info", ignore_errors=True)
+        rmtree("build", ignore_errors=True)
+        rmtree("dist", ignore_errors=True)
+
+
 class TestCommandExtension(TestCommand):
     """Run pytest tests."""
 
@@ -33,7 +50,11 @@ class TestCommandExtension(TestCommand):
         """Invoke pytest."""
         import pytest
 
-        exit(pytest.main(["--doctest-modules"]))
+        exit(pytest.main(["--doctest-modules", "-rapP"]))
+        #        show short test summary at end ^
+        # above call commented out due to a problem with launch kit,
+        # documented at
+        # https://github.com/0xProject/0x-launch-kit-backend/issues/73
 
 
 class TestPublishCommand(distutils.command.build_py.build_py):
@@ -54,7 +75,7 @@ class TestPublishCommand(distutils.command.build_py.build_py):
 
 
 class StartTestRelayerCommand(distutils.command.build_py.build_py):
-    """Custom command to boot up a local 0x-launch-kit in docker."""
+    """Custom command to boot up a local 0x-launch-kit-backend in docker."""
 
     description = "Run launch-kit daemon to support tests."
 
@@ -79,7 +100,7 @@ class StartTestRelayerCommand(distutils.command.build_py.build_py):
 
 
 class StopTestRelayerCommand(distutils.command.build_py.build_py):
-    """Custom command to tear down the local 0x-launch-kit test relayer."""
+    """Custom command to tear down the 0x-launch-kit-backend test relayer."""
 
     description = "Tear down launch-kit daemon."
 
@@ -97,17 +118,20 @@ class LintCommand(distutils.command.build_py.build_py):
 
     def run(self):
         """Run linter shell commands."""
+        lint_targets = "test src/zero_ex/sra_client/__init__.py setup.py"
         lint_commands = [
             # formatter:
-            "black --line-length 79 --check --diff test sra_client/__init__.py setup.py".split(),  # noqa: E501 (line too long)
+            (
+                f"black --line-length 79 --check --diff test {lint_targets}"
+            ).split(),
             # style guide checker (formerly pep8):
-            "pycodestyle test sra_client/__init__.py setup.py".split(),
+            f"pycodestyle {lint_targets}".split(),
             # docstring style checker:
-            "pydocstyle src test sra_client/__init__.py setup.py".split(),
+            f"pydocstyle {lint_targets}".split(),
             # static type checker:
-            "bandit -r test sra_client/__init__.py setup.py".split(),
+            f"bandit -r {lint_targets}".split(),
             # general linter:
-            "pylint test sra_client/__init__.py setup.py".split(),
+            f"pylint {lint_targets}".split(),
             # pylint takes relatively long to run, so it runs last, to enable
             # fast failures.
         ]
@@ -134,7 +158,7 @@ class PublishDocsCommand(distutils.command.build_py.build_py):
 
     description = (
         "Publish docs to "
-        + "http://0x-sra-demos-py.s3-website-us-east-1.amazonaws.com/"
+        + "http://0x-sra-client-py.s3-website-us-east-1.amazonaws.com/"
     )
 
     def run(self):
@@ -145,16 +169,23 @@ class PublishDocsCommand(distutils.command.build_py.build_py):
 setup(
     name=NAME,
     version=VERSION,
-    description="Standard Relayer REST API",
-    author_email="",
-    url="https://github.com/0xproject/0x-monorepo/python-packages/sra_client",
+    description="Standard Relayer REST API Client",
+    author="F. Eugene Aumson",
+    author_email="feuGeneA@users.noreply.github.com",
+    url=(
+        "https://github.com/0xproject/0x-monorepo/tree/development"
+        "/python-packages/sra_client"
+    ),
     keywords=["OpenAPI", "OpenAPI-Generator", "Standard Relayer REST API"],
     install_requires=REQUIRES,
-    packages=find_packages(),
+    namespace_packages=["zero_ex"],
+    packages=find_packages("src"),
+    package_dir={"": "src"},
     include_package_data=True,
     long_description=README_MD,
     long_description_content_type="text/markdown",
     cmdclass={
+        "clean": CleanCommandExtension,
         "test_publish": TestPublishCommand,
         "publish": PublishCommand,
         "start_test_relayer": StartTestRelayerCommand,
@@ -168,7 +199,7 @@ setup(
             "0x-contract-artifacts",
             "0x-contract-addresses",
             "0x-order-utils",
-            "0x-web3",
+            "web3",
             "bandit",
             "black",
             "coverage",
@@ -183,8 +214,9 @@ setup(
     },
     command_options={
         "build_sphinx": {
-            "source_dir": ("setup.py", "."),
+            "source_dir": ("setup.py", "src"),
             "build_dir": ("setup.py", "build/docs"),
+            "warning_is_error": ("setup.py", "true"),
         }
     },
 )

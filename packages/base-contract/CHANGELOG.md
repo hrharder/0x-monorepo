@@ -5,6 +5,35 @@ Edit the package's CHANGELOG.json file only.
 
 CHANGELOG
 
+## v5.3.1 - _August 8, 2019_
+
+    * Dependencies updated
+
+## v5.3.0 - _July 31, 2019_
+
+    * Updated interface to `deployFrom0xArtifactAsync` to include log decode dependencies. (#1995)
+    * Updated interface to `deployAsync` to include log decode dependencies. (#1995)
+
+## v5.2.0 - _Invalid date_
+
+    * Add SubscriptionManager (#1970)
+
+## v5.1.2 - _July 24, 2019_
+
+    * Dependencies updated
+
+## v5.1.1 - _July 13, 2019_
+
+    * Dependencies updated
+
+## v5.1.0 - _May 10, 2019_
+
+    * Export `PromiseWithTransactionHash` type (#1797)
+
+## v5.0.5 - _April 11, 2019_
+
+    * Dependencies updated
+
 ## v5.0.4 - _March 21, 2019_
 
     * Dependencies updated

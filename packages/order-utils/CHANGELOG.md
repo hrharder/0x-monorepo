@@ -5,6 +5,53 @@ Edit the package's CHANGELOG.json file only.
 
 CHANGELOG
 
+## v8.2.5 - _August 8, 2019_
+
+    * Dependencies updated
+
+## v8.2.4 - _July 31, 2019_
+
+    * Updated calls to <contract wrapper>.deploy0xArtifactAsync to include log decode dependencies. (#1995)
+
+## v8.2.3 - _July 24, 2019_
+
+    * Ensure `assetData` is word aligned (#1964)
+
+## v8.2.2 - _July 15, 2019_
+
+    * Dependencies updated
+
+## v8.2.1 - _July 13, 2019_
+
+    * Dependencies updated
+
+## v8.2.0 - _July 13, 2019_
+
+    * Add support for encoding/decoding StaticCallProxy assetData (#1863)
+    * Add support for marketSell utils (#1914)
+    * Add support for encoding/decoding DutchAuction assetData (#1943)
+    * Added `validateMakerTransferThrowIfInvalidAsync` to OrderValidationUtils (#1937)
+
+## v8.1.1 - _May 24, 2019_
+
+    * Dependencies updated
+
+## v8.1.0 - _May 15, 2019_
+
+    * Add `ecSignTransactionAsync` (#1817)
+
+## v8.0.2 - _May 14, 2019_
+
+    * Dependencies updated
+
+## v8.0.0 - _May 10, 2019_
+
+    * Renamed `OrderError` to `TypedDataError` (#1792)
+
+## v7.2.0 - _April 11, 2019_
+
+    * Added `orderCalculationUtils` (#1714)
+
 ## v7.1.1 - _March 21, 2019_
 
     * Dependencies updated

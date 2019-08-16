@@ -1,5 +1,4 @@
 import { DummyERC20TokenContract, DummyERC721TokenContract, ExchangeContract } from '@0x/abi-gen-wrappers';
-import * as artifacts from '@0x/contract-artifacts';
 import { assetDataUtils } from '@0x/order-utils';
 import { orderFactory } from '@0x/order-utils/lib/src/order_factory';
 import { OrderWithoutExchangeAddress, SignedOrder } from '@0x/types';
@@ -62,6 +61,7 @@ export class FillScenarios {
         fillableAmount: BigNumber,
         feeRecipientAddress: string,
         expirationTimeSeconds?: BigNumber,
+        senderAddress?: string,
     ): Promise<SignedOrder> {
         return this._createAsymmetricFillableSignedOrderWithFeesAsync(
             makerAssetData,
@@ -74,6 +74,7 @@ export class FillScenarios {
             fillableAmount,
             feeRecipientAddress,
             expirationTimeSeconds,
+            senderAddress,
         );
     }
     public async createAsymmetricFillableSignedOrderAsync(
@@ -118,7 +119,6 @@ export class FillScenarios {
             fillableAmount,
         );
         const exchangeInstance = new ExchangeContract(
-            artifacts.Exchange.compilerOutput.abi,
             signedOrder.exchangeAddress,
             this._web3Wrapper.getProvider(),
             this._web3Wrapper.getContractDefaults(),
@@ -149,6 +149,7 @@ export class FillScenarios {
         takerFillableAmount: BigNumber,
         feeRecipientAddress: string,
         expirationTimeSeconds?: BigNumber,
+        senderAddress?: string,
     ): Promise<SignedOrder> {
         await this._increaseBalanceAndAllowanceWithAssetDataAsync(makerAssetData, makerAddress, makerFillableAmount);
         await this._increaseBalanceAndAllowanceWithAssetDataAsync(takerAssetData, takerAddress, takerFillableAmount);
@@ -157,7 +158,7 @@ export class FillScenarios {
             this._increaseERC20BalanceAndAllowanceAsync(this._zrxTokenAddress, makerAddress, makerFee),
             this._increaseERC20BalanceAndAllowanceAsync(this._zrxTokenAddress, takerAddress, takerFee),
         ]);
-        const senderAddress = constants.NULL_ADDRESS;
+        const _senderAddress = senderAddress ? senderAddress : constants.NULL_ADDRESS;
 
         const signedOrder = await orderFactory.createSignedOrderAsync(
             this._web3Wrapper.getProvider(),
@@ -169,7 +170,7 @@ export class FillScenarios {
             this._exchangeAddress,
             {
                 takerAddress,
-                senderAddress,
+                senderAddress: _senderAddress,
                 makerFee,
                 takerFee,
                 feeRecipientAddress,
@@ -192,7 +193,6 @@ export class FillScenarios {
         tokenId: BigNumber,
     ): Promise<void> {
         const erc721Token = new DummyERC721TokenContract(
-            artifacts.DummyERC721Token.compilerOutput.abi,
             tokenAddress,
             this._web3Wrapper.getProvider(),
             this._web3Wrapper.getContractDefaults(),
@@ -208,7 +208,6 @@ export class FillScenarios {
         tokenId: BigNumber,
     ): Promise<void> {
         const erc721Token = new DummyERC721TokenContract(
-            artifacts.DummyERC721Token.compilerOutput.abi,
             tokenAddress,
             this._web3Wrapper.getProvider(),
             this._web3Wrapper.getContractDefaults(),
@@ -238,7 +237,6 @@ export class FillScenarios {
     }
     private async _increaseERC20BalanceAsync(tokenAddress: string, address: string, amount: BigNumber): Promise<void> {
         const erc20Token = new DummyERC20TokenContract(
-            artifacts.DummyERC20Token.compilerOutput.abi,
             tokenAddress,
             this._web3Wrapper.getProvider(),
             this._web3Wrapper.getContractDefaults(),
@@ -254,7 +252,6 @@ export class FillScenarios {
         amount: BigNumber,
     ): Promise<void> {
         const erc20Token = new DummyERC20TokenContract(
-            artifacts.DummyERC20Token.compilerOutput.abi,
             tokenAddress,
             this._web3Wrapper.getProvider(),
             this._web3Wrapper.getContractDefaults(),

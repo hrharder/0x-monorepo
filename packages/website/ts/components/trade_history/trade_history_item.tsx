@@ -1,4 +1,3 @@
-import { colors, EtherscanLinkSuffixes } from '@0x/react-shared';
 import { BigNumber } from '@0x/utils';
 import { Web3Wrapper } from '@0x/web3-wrapper';
 import * as _ from 'lodash';
@@ -8,7 +7,8 @@ import * as React from 'react';
 import * as ReactTooltip from 'react-tooltip';
 import { EtherScanIcon } from 'ts/components/ui/etherscan_icon';
 import { Party } from 'ts/components/ui/party';
-import { Fill, Token, TokenByAddress } from 'ts/types';
+import { EtherscanLinkSuffixes, Fill, Token, TokenByAddress } from 'ts/types';
+import { colors } from 'ts/utils/colors';
 import { configs } from 'ts/utils/configs';
 
 const IDENTICON_DIAMETER = 40;
@@ -36,7 +36,7 @@ export class TradeHistoryItem extends React.Component<TradeHistoryItemProps, Tra
         // tokens the client does not know how to display.
         // TODO: Try to retrieve the name/symbol of an unknown token in order to display it
         // Be sure to remove similar logic in trade_history.tsx
-        if (_.isUndefined(takerToken) || _.isUndefined(makerToken)) {
+        if (takerToken === undefined || makerToken === undefined) {
             return null;
         }
 

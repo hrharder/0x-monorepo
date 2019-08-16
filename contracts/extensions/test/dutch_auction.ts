@@ -1,4 +1,3 @@
-import { DutchAuctionWrapper } from '@0x/contract-wrappers';
 import { ERC20Wrapper, ERC721Wrapper } from '@0x/contracts-asset-proxy';
 import { DummyERC20TokenContract } from '@0x/contracts-erc20';
 import { DummyERC721TokenContract } from '@0x/contracts-erc721';
@@ -82,7 +81,7 @@ describe(ContractName.DutchAuction, () => {
         const erc721Balances = await erc721Wrapper.getBalancesAsync();
         erc721MakerAssetIds = erc721Balances[makerAddress][erc721Token.address];
 
-        wethContract = await WETH9Contract.deployFrom0xArtifactAsync(artifacts.WETH9, provider, txDefaults);
+        wethContract = await WETH9Contract.deployFrom0xArtifactAsync(artifacts.WETH9, provider, txDefaults, artifacts);
         erc20Wrapper.addDummyTokenContract(wethContract as any);
 
         const zrxAssetData = assetDataUtils.encodeERC20AssetData(zrxToken.address);
@@ -90,6 +89,7 @@ describe(ContractName.DutchAuction, () => {
             artifacts.Exchange,
             provider,
             txDefaults,
+            artifacts,
             zrxAssetData,
         );
         const exchangeWrapper = new ExchangeWrapper(exchangeInstance, provider);
@@ -107,13 +107,10 @@ describe(ContractName.DutchAuction, () => {
             artifacts.DutchAuction,
             provider,
             txDefaults,
+            artifacts,
             exchangeInstance.address,
         );
-        dutchAuctionContract = new DutchAuctionContract(
-            dutchAuctionInstance.abi,
-            dutchAuctionInstance.address,
-            provider,
-        );
+        dutchAuctionContract = new DutchAuctionContract(dutchAuctionInstance.address, provider);
         dutchAuctionTestWrapper = new DutchAuctionTestWrapper(dutchAuctionInstance, provider);
 
         defaultMakerAssetAddress = erc20TokenA.address;
@@ -153,7 +150,7 @@ describe(ContractName.DutchAuction, () => {
             feeRecipientAddress,
             // taker address or sender address should be set to the ducth auction contract
             takerAddress: dutchAuctionContract.address,
-            makerAssetData: DutchAuctionWrapper.encodeDutchAuctionAssetData(
+            makerAssetData: assetDataUtils.encodeDutchAuctionAssetData(
                 assetDataUtils.encodeERC20AssetData(defaultMakerAssetAddress),
                 auctionBeginTimeSeconds,
                 auctionBeginAmount,
@@ -195,7 +192,7 @@ describe(ContractName.DutchAuction, () => {
     describe('matchOrders', () => {
         it('should be worth the begin price at the begining of the auction', async () => {
             auctionBeginTimeSeconds = new BigNumber(currentBlockTimestamp + 2);
-            const makerAssetData = DutchAuctionWrapper.encodeDutchAuctionAssetData(
+            const makerAssetData = assetDataUtils.encodeDutchAuctionAssetData(
                 defaultERC20MakerAssetData,
                 auctionBeginTimeSeconds,
                 auctionBeginAmount,
@@ -209,7 +206,7 @@ describe(ContractName.DutchAuction, () => {
         it('should be be worth the end price at the end of the auction', async () => {
             auctionBeginTimeSeconds = new BigNumber(currentBlockTimestamp - tenMinutesInSeconds * 2);
             auctionEndTimeSeconds = new BigNumber(currentBlockTimestamp - tenMinutesInSeconds);
-            const makerAssetData = DutchAuctionWrapper.encodeDutchAuctionAssetData(
+            const makerAssetData = assetDataUtils.encodeDutchAuctionAssetData(
                 defaultERC20MakerAssetData,
                 auctionBeginTimeSeconds,
                 auctionBeginAmount,
@@ -275,7 +272,7 @@ describe(ContractName.DutchAuction, () => {
         it('should revert when auction expires', async () => {
             auctionBeginTimeSeconds = new BigNumber(currentBlockTimestamp - tenMinutesInSeconds * 2);
             auctionEndTimeSeconds = new BigNumber(currentBlockTimestamp - tenMinutesInSeconds);
-            const makerAssetData = DutchAuctionWrapper.encodeDutchAuctionAssetData(
+            const makerAssetData = assetDataUtils.encodeDutchAuctionAssetData(
                 defaultERC20MakerAssetData,
                 auctionBeginTimeSeconds,
                 auctionBeginAmount,
@@ -309,7 +306,7 @@ describe(ContractName.DutchAuction, () => {
         });
         it('begin time is less than end time', async () => {
             auctionBeginTimeSeconds = new BigNumber(auctionEndTimeSeconds).plus(tenMinutesInSeconds);
-            const makerAssetData = DutchAuctionWrapper.encodeDutchAuctionAssetData(
+            const makerAssetData = assetDataUtils.encodeDutchAuctionAssetData(
                 defaultERC20MakerAssetData,
                 auctionBeginTimeSeconds,
                 auctionBeginAmount,
@@ -337,7 +334,7 @@ describe(ContractName.DutchAuction, () => {
             it('should match orders when ERC721', async () => {
                 const makerAssetId = erc721MakerAssetIds[0];
                 const erc721MakerAssetData = assetDataUtils.encodeERC721AssetData(erc721Token.address, makerAssetId);
-                const makerAssetData = DutchAuctionWrapper.encodeDutchAuctionAssetData(
+                const makerAssetData = assetDataUtils.encodeDutchAuctionAssetData(
                     erc721MakerAssetData,
                     auctionBeginTimeSeconds,
                     auctionBeginAmount,

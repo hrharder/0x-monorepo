@@ -1,5 +1,5 @@
-import { colors } from '@0x/react-shared';
 import * as React from 'react';
+import { colors } from 'ts/utils/colors';
 
 import * as _ from 'lodash';
 import { Button } from 'ts/components/ui/button';
@@ -74,7 +74,7 @@ export const OnboardingCard: React.StatelessComponent<OnboardingCardProps> = ({
                     {continueButtonDisplay && (
                         <Button
                             isDisabled={continueButtonDisplay === 'disabled'}
-                            onClick={!_.isUndefined(onContinueButtonClick) ? onContinueButtonClick : onClickNext}
+                            onClick={onContinueButtonClick !== undefined ? onContinueButtonClick : onClickNext}
                             fontColor={colors.white}
                             fontSize="15px"
                             backgroundColor={colors.mediumBlue}

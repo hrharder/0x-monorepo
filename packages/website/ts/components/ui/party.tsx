@@ -1,9 +1,11 @@
-import { colors, EtherscanLinkSuffixes, utils as sharedUtils } from '@0x/react-shared';
 import * as _ from 'lodash';
 import * as React from 'react';
 import ReactTooltip from 'react-tooltip';
 import { EthereumAddress } from 'ts/components/ui/ethereum_address';
 import { Identicon } from 'ts/components/ui/identicon';
+import { EtherscanLinkSuffixes } from 'ts/types';
+import { colors } from 'ts/utils/colors';
+import { utils } from 'ts/utils/utils';
 
 const IMAGE_DIMENSION = 100;
 const IDENTICON_DIAMETER = 95;
@@ -41,7 +43,7 @@ export class Party extends React.Component<PartyProps, PartyState> {
             width: IMAGE_DIMENSION,
             height: IMAGE_DIMENSION,
         };
-        const etherscanLinkIfExists = sharedUtils.getEtherScanLinkIfExists(
+        const etherscanLinkIfExists = utils.getEtherScanLinkIfExists(
             this.props.address,
             this.props.networkId,
             EtherscanLinkSuffixes.Address,
@@ -56,7 +58,7 @@ export class Party extends React.Component<PartyProps, PartyState> {
                     <div className="circle mx-auto" style={emptyIdenticonStyles} />
                 ) : (
                     <a href={etherscanLinkIfExists} target="_blank">
-                        {isRegistered && !_.isUndefined(this.props.alternativeImage) ? (
+                        {isRegistered && this.props.alternativeImage !== undefined ? (
                             <img style={tokenImageStyle} src={this.props.alternativeImage} />
                         ) : (
                             <div className="mx-auto" style={{ height: identiconDiameter, width: identiconDiameter }}>
@@ -73,7 +75,7 @@ export class Party extends React.Component<PartyProps, PartyState> {
                     <div style={{ height: 25 }}>
                         <EthereumAddress address={address} networkId={this.props.networkId} />
                     </div>
-                    {!_.isUndefined(this.props.isInTokenRegistry) && (
+                    {this.props.isInTokenRegistry !== undefined && (
                         <div>
                             <div
                                 data-tip={true}
@@ -112,7 +114,7 @@ export class Party extends React.Component<PartyProps, PartyState> {
                             </div>
                         </div>
                     )}
-                    {!_.isUndefined(this.props.hasUniqueNameAndSymbol) && !this.props.hasUniqueNameAndSymbol && (
+                    {this.props.hasUniqueNameAndSymbol !== undefined && !this.props.hasUniqueNameAndSymbol && (
                         <div>
                             <div
                                 data-tip={true}

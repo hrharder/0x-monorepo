@@ -1,4 +1,3 @@
-import { colors, EtherscanLinkSuffixes, utils as sharedUtils } from '@0x/react-shared';
 import { BigNumber } from '@0x/utils';
 import { Web3Wrapper } from '@0x/web3-wrapper';
 import * as _ from 'lodash';
@@ -11,6 +10,7 @@ import { Blockchain } from 'ts/blockchain';
 import { EthWethConversionButton } from 'ts/components/eth_weth_conversion_button';
 import { Dispatcher } from 'ts/redux/dispatcher';
 import {
+    EtherscanLinkSuffixes,
     OutdatedWrappedEtherByNetworkId,
     Side,
     Token,
@@ -18,6 +18,7 @@ import {
     TokenState,
     TokenStateByAddress,
 } from 'ts/types';
+import { colors } from 'ts/utils/colors';
 import { configs } from 'ts/utils/configs';
 import { constants } from 'ts/utils/constants';
 import { utils } from 'ts/utils/utils';
@@ -91,7 +92,7 @@ export class EthWrappers extends React.Component<EthWrappersProps, EthWrappersSt
         const etherToken = this._getEthToken();
         const wethBalance = Web3Wrapper.toUnitAmount(this.state.ethTokenState.balance, constants.DECIMAL_PLACES_ETH);
         const isBidirectional = true;
-        const etherscanUrl = sharedUtils.getEtherScanLinkIfExists(
+        const etherscanUrl = utils.getEtherScanLinkIfExists(
             etherToken.address,
             this.props.networkId,
             EtherscanLinkSuffixes.Address,
@@ -101,9 +102,10 @@ export class EthWrappers extends React.Component<EthWrappersProps, EthWrappersSt
             etherToken.address,
             utils.getTokenIconUrl(etherToken.symbol),
         );
-        const userEtherBalanceInEth = !_.isUndefined(this.props.userEtherBalanceInWei)
-            ? Web3Wrapper.toUnitAmount(this.props.userEtherBalanceInWei, constants.DECIMAL_PLACES_ETH)
-            : undefined;
+        const userEtherBalanceInEth =
+            this.props.userEtherBalanceInWei !== undefined
+                ? Web3Wrapper.toUnitAmount(this.props.userEtherBalanceInWei, constants.DECIMAL_PLACES_ETH)
+                : undefined;
         const rootClassName = this.props.isFullWidth ? 'clearfix' : 'clearfix lg-px4 md-px4 sm-px2';
         return (
             <div className={rootClassName} style={{ minHeight: 600 }}>
@@ -151,7 +153,7 @@ export class EthWrappers extends React.Component<EthWrappersProps, EthWrappersSt
                                         </div>
                                     </TableRowColumn>
                                     <TableRowColumn>
-                                        {!_.isUndefined(userEtherBalanceInEth) ? (
+                                        {userEtherBalanceInEth !== undefined ? (
                                             `${userEtherBalanceInEth.toFixed(configs.AMOUNT_DISPLAY_PRECSION)} ETH`
                                         ) : (
                                             <i className="zmdi zmdi-spinner zmdi-hc-spin" />
@@ -169,7 +171,7 @@ export class EthWrappers extends React.Component<EthWrappersProps, EthWrappersSt
                                             dispatcher={this.props.dispatcher}
                                             blockchain={this.props.blockchain}
                                             userEtherBalanceInWei={this.props.userEtherBalanceInWei}
-                                            isDisabled={_.isUndefined(userEtherBalanceInEth)}
+                                            isDisabled={userEtherBalanceInEth === undefined}
                                         />
                                     </TableRowColumn>
                                 </TableRow>
@@ -257,12 +259,12 @@ export class EthWrappers extends React.Component<EthWrappersProps, EthWrappersSt
             configs.OUTDATED_WRAPPED_ETHERS,
             (outdatedWETHByNetworkId: OutdatedWrappedEtherByNetworkId) => {
                 const outdatedWETHIfExists = outdatedWETHByNetworkId[this.props.networkId];
-                if (_.isUndefined(outdatedWETHIfExists)) {
+                if (outdatedWETHIfExists === undefined) {
                     return null; // noop
                 }
                 const timestampMsRange = outdatedWETHIfExists.timestampMsRange;
                 let dateRange: string;
-                if (!_.isUndefined(timestampMsRange)) {
+                if (timestampMsRange !== undefined) {
                     const startMoment = moment(timestampMsRange.startTimestampMs);
                     const endMoment = moment(timestampMsRange.endTimestampMs);
                     dateRange = `${startMoment.format(DATE_FORMAT)}-${endMoment.format(DATE_FORMAT)}`;
@@ -284,7 +286,7 @@ export class EthWrappers extends React.Component<EthWrappersProps, EthWrappersSt
                     this,
                     outdatedWETHIfExists.address,
                 );
-                const etherscanUrl = sharedUtils.getEtherScanLinkIfExists(
+                const etherscanUrl = utils.getEtherScanLinkIfExists(
                     outdatedWETHIfExists.address,
                     this.props.networkId,
                     EtherscanLinkSuffixes.Address,
@@ -327,7 +329,7 @@ export class EthWrappers extends React.Component<EthWrappersProps, EthWrappersSt
     private _renderTokenLink(tokenLabel: React.ReactNode, etherscanUrl: string): React.ReactNode {
         return (
             <span>
-                {_.isUndefined(etherscanUrl) ? (
+                {etherscanUrl === undefined ? (
                     tokenLabel
                 ) : (
                     <a href={etherscanUrl} target="_blank" style={{ textDecoration: 'none' }}>
@@ -416,7 +418,7 @@ export class EthWrappers extends React.Component<EthWrappersProps, EthWrappersSt
         const outdatedWETHAddresses = _.compact(
             _.map(configs.OUTDATED_WRAPPED_ETHERS, outdatedWrappedEtherByNetwork => {
                 const outdatedWrappedEtherIfExists = outdatedWrappedEtherByNetwork[this.props.networkId];
-                if (_.isUndefined(outdatedWrappedEtherIfExists)) {
+                if (outdatedWrappedEtherIfExists === undefined) {
                     return undefined;
                 }
                 const address = outdatedWrappedEtherIfExists.address;

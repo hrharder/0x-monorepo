@@ -1,9 +1,9 @@
-import { colors } from '@0x/react-shared';
 import { addressUtils } from '@0x/utils';
 import * as _ from 'lodash';
 import TextField from 'material-ui/TextField';
 import * as React from 'react';
 import { RequiredLabel } from 'ts/components/ui/required_label';
+import { colors } from 'ts/utils/colors';
 
 interface AddressInputProps {
     disabled?: boolean;
@@ -44,7 +44,7 @@ export class AddressInput extends React.Component<AddressInputProps, AddressInpu
             <div className="overflow-hidden">
                 <TextField
                     id={`address-field-${this.props.label}`}
-                    disabled={_.isUndefined(this.props.disabled) ? false : this.props.disabled}
+                    disabled={this.props.disabled === undefined ? false : this.props.disabled}
                     fullWidth={true}
                     hintText={hintText}
                     floatingLabelFixed={true}

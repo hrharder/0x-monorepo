@@ -30,7 +30,7 @@ export const utils = {
     },
     getPackages(rootDir: string): Package[] {
         const rootPackageJson = utils.readJSONFile<PackageJSON>(`${rootDir}/package.json`);
-        if (_.isUndefined(rootPackageJson.workspaces)) {
+        if (rootPackageJson.workspaces === undefined) {
             throw new Error(`Did not find 'workspaces' key in root package.json`);
         }
         const packages = [];
@@ -76,15 +76,21 @@ export const utils = {
         return updatedPackages;
     },
     async getLernaUpdatedPackagesAsync(shouldIncludePrivate: boolean): Promise<UpdatedPackage[]> {
-        const result = await execAsync(`${constants.lernaExecutable} updated --json`, {
-            cwd: constants.monorepoRootPath,
-        });
-        const updatedPackages = JSON.parse(result.stdout);
-        if (!shouldIncludePrivate) {
-            const updatedPublicPackages = _.filter(updatedPackages, updatedPackage => !updatedPackage.private);
-            return updatedPublicPackages;
+        try {
+            const result = await execAsync(
+                `${constants.lernaExecutable} changed --json ${shouldIncludePrivate ? '--all' : ''}`,
+                {
+                    cwd: constants.monorepoRootPath,
+                },
+            );
+            if (result.stdout === '') {
+                return [];
+            }
+            const updatedPackages = JSON.parse(result.stdout);
+            return updatedPackages;
+        } catch (err) {
+            return [];
         }
-        return updatedPackages;
     },
     async getNextPackageVersionAsync(
         currentVersion: string,
@@ -104,7 +110,7 @@ export const utils = {
         nextVersionIfValid = semver.eq(lastEntry.version, currentVersion)
             ? semver.inc(currentVersion, 'patch')
             : lastEntry.version;
-        if (_.isNull(nextVersionIfValid)) {
+        if (nextVersionIfValid === null) {
             throw new Error(`Encountered invalid semver: ${currentVersion} associated with ${packageName}`);
         }
         return nextVersionIfValid;
@@ -144,7 +150,7 @@ export const utils = {
             const packageNameIfExists = _.find(packageNames, name => {
                 return _.includes(tag, `${name}@`);
             });
-            if (_.isUndefined(packageNameIfExists)) {
+            if (packageNameIfExists === undefined) {
                 return; // ignore tags not related to a package we care about.
             }
             const splitTag = tag.split(`${packageNameIfExists}@`);

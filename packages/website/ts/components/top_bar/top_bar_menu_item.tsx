@@ -1,6 +1,7 @@
-import { colors, Link } from '@0x/react-shared';
 import * as _ from 'lodash';
 import * as React from 'react';
+import { Link } from 'ts/components/documentation/shared/link';
+import { colors } from 'ts/style/colors';
 
 import { CallToAction } from 'ts/components/ui/button';
 
@@ -30,7 +31,7 @@ export class TopBarMenuItem extends React.Component<TopBarMenuItemProps, TopBarM
     };
     public render(): React.ReactNode {
         const menuItemColor = this.props.isNightVersion ? 'white' : this.props.style.color;
-        const linkColor = _.isUndefined(menuItemColor) ? colors.darkestGrey : menuItemColor;
+        const linkColor = menuItemColor === undefined ? colors.darkestGrey : menuItemColor;
         const itemContent = this.props.isPrimary ? (
             <CallToAction padding="0.8em 1.5em">{this.props.title}</CallToAction>
         ) : (

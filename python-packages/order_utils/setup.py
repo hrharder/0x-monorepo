@@ -21,7 +21,8 @@ class TestCommandExtension(TestCommand):
         """Invoke pytest."""
         import pytest
 
-        exit(pytest.main(["--doctest-modules"]))
+        exit(pytest.main(["--doctest-modules", "-rapP"]))
+        #        show short test summary at end ^
 
 
 class LintCommand(distutils.command.build_py.build_py):
@@ -82,7 +83,10 @@ class CleanCommandExtension(clean):
     def run(self):
         """Run the regular clean, followed by our custom commands."""
         super().run()
+        rmtree("build", ignore_errors=True)
         rmtree("dist", ignore_errors=True)
+        rmtree(".coverage", ignore_errors=True)
+        rmtree(".eggs", ignore_errors=True)
         rmtree(".mypy_cache", ignore_errors=True)
         rmtree(".tox", ignore_errors=True)
         rmtree(".pytest_cache", ignore_errors=True)
@@ -148,11 +152,14 @@ with open("README.md", "r") as file_handle:
 
 setup(
     name="0x-order-utils",
-    version="1.0.1",
+    version="3.0.1",
     description="Order utilities for 0x applications",
     long_description=README_MD,
     long_description_content_type="text/markdown",
-    url="https://github.com/0xproject/0x-monorepo/python-packages/order_utils",
+    url=(
+        "https://github.com/0xProject/0x-monorepo/tree/development"
+        "/python-packages/order_utils"
+    ),
     author="F. Eugene Aumson",
     author_email="feuGeneA@users.noreply.github.com",
     cmdclass={
@@ -168,15 +175,15 @@ setup(
         "0x-contract-addresses",
         "0x-contract-artifacts",
         "0x-json-schemas",
-        "0x-web3",
+        "deprecated",
+        "web3",
         "eth-abi",
         "eth_utils",
-        "hypothesis>=3.31.2",  # HACK! this is web3's dependency!
-        # above works around https://github.com/ethereum/web3.py/issues/1179
         "mypy_extensions",
     ],
     extras_require={
         "dev": [
+            "0x-contract-wrappers",
             "bandit",
             "black",
             "coverage",
@@ -225,6 +232,7 @@ setup(
         "build_sphinx": {
             "source_dir": ("setup.py", "src"),
             "build_dir": ("setup.py", "build/docs"),
+            "warning_is_error": ("setup.py", "true"),
         }
     },
 )

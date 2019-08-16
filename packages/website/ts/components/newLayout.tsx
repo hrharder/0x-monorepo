@@ -1,6 +1,8 @@
 import * as React from 'react';
 import styled from 'styled-components';
 
+import { opacify } from 'polished';
+
 export interface WrapProps {
     bgColor?: string;
     id?: string;
@@ -27,7 +29,10 @@ export interface SectionProps extends WrapProps {
     isFullWidth?: boolean;
     isFlex?: boolean;
     padding?: string;
+    margin?: string;
     paddingMobile?: string;
+    hasBorder?: boolean;
+    hasHover?: boolean;
     flexBreakpoint?: string;
     maxWidth?: string;
     bgColor?: 'dark' | 'light' | string;
@@ -74,7 +79,6 @@ export const Column = styled.div<ColumnProps>`
 export const FlexWrap = styled.div<FlexProps>`
     max-width: 1500px;
     margin: 0 auto;
-    padding: ${props => props.padding};
 
     @media (min-width: ${props => props.flexBreakpoint || '768px'}) {
         display: ${props => props.isFlex && 'flex'};
@@ -92,11 +96,17 @@ export const WrapSticky = styled.div<WrapProps>`
 const SectionBase = styled.section<SectionProps>`
     width: ${props => !props.isFullWidth && 'calc(100% - 60px)'};
     max-width: 1500px;
-    margin: 0 auto;
-    padding: ${props => props.isPadded && '120px 0'};
+    cursor: ${props => props.hasHover && 'pointer'};
+    border: ${props => props.hasBorder && `1px solid ${props.theme.lightBgColor}`};
+    margin: ${props => (props.margin ? props.margin : '0 auto')};
+    padding: ${props => props.isPadded && (props.padding || '120px 0')};
     background-color: ${props => props.theme[`${props.bgColor}BgColor`] || props.bgColor};
     position: relative;
     overflow: ${props => !props.isFullWidth && 'hidden'};
+
+    &:hover {
+        background-color: ${props => props.hasHover && opacify(0.2, props.theme[`lightBgColor`])};
+    }
 
     @media (max-width: 768px) {
         padding: ${props => props.isPadded && (props.paddingMobile || '40px 0')};
@@ -109,6 +119,9 @@ const Wrap = styled(FlexWrap)<WrapProps>`
     max-width: ${props => !props.isFullWidth && (props.maxWidth || '895px')};
     text-align: ${props => props.isTextCentered && 'center'};
     margin: 0 auto;
+    @media (max-width: 768px) {
+        width: ${props => (!!props.bgColor ? 'calc(100% - 60px)' : '100%')};
+    }
 `;
 
 export const WrapGrid = styled(Wrap)<WrapProps>`

@@ -66,11 +66,12 @@ describe('MultiSigWalletWithTimeLock', () => {
                 artifacts.MultiSigWalletWithTimeLock,
                 provider,
                 txDefaults,
+                artifacts,
                 owners,
                 REQUIRED_APPROVALS,
                 secondsTimeLocked,
             );
-            expect(_.isUndefined((multiSig as any).external_call)).to.be.equal(true);
+            expect((multiSig as any).external_call === undefined).to.be.equal(true);
         });
     });
     describe('confirmTransaction', () => {
@@ -81,6 +82,7 @@ describe('MultiSigWalletWithTimeLock', () => {
                 artifacts.MultiSigWalletWithTimeLock,
                 provider,
                 txDefaults,
+                artifacts,
                 owners,
                 REQUIRED_APPROVALS,
                 secondsTimeLocked,
@@ -135,6 +137,7 @@ describe('MultiSigWalletWithTimeLock', () => {
                 artifacts.MultiSigWalletWithTimeLock,
                 provider,
                 txDefaults,
+                artifacts,
                 owners,
                 REQUIRED_APPROVALS,
                 secondsTimeLocked,
@@ -198,6 +201,7 @@ describe('MultiSigWalletWithTimeLock', () => {
                 artifacts.TestRejectEther,
                 provider,
                 txDefaults,
+                artifacts,
             );
             const data = constants.NULL_BYTES;
             const value = new BigNumber(10);
@@ -234,6 +238,7 @@ describe('MultiSigWalletWithTimeLock', () => {
                     artifacts.MultiSigWalletWithTimeLock,
                     provider,
                     txDefaults,
+                    artifacts,
                     owners,
                     REQUIRED_APPROVALS,
                     secondsTimeLocked,
@@ -271,7 +276,7 @@ describe('MultiSigWalletWithTimeLock', () => {
 
                 const blockNum = await web3Wrapper.getBlockNumberAsync();
                 const blockInfo = await web3Wrapper.getBlockIfExistsAsync(blockNum);
-                if (_.isUndefined(blockInfo)) {
+                if (blockInfo === undefined) {
                     throw new Error(`Unexpectedly failed to fetch block at #${blockNum}`);
                 }
                 const timestamp = new BigNumber(blockInfo.timestamp);
@@ -308,6 +313,7 @@ describe('MultiSigWalletWithTimeLock', () => {
                     artifacts.MultiSigWalletWithTimeLock,
                     provider,
                     txDefaults,
+                    artifacts,
                     owners,
                     REQUIRED_APPROVALS,
                     SECONDS_TIME_LOCKED,

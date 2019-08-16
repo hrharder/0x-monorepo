@@ -5,6 +5,35 @@ Edit the package's CHANGELOG.json file only.
 
 CHANGELOG
 
+## v4.5.0 - _August 8, 2019_
+
+    * Updated to include `strictDecode` for decoding method arguments (#2018)
+    * Throw exception when trying to decode beyond boundaries of calldata (#2018)
+
+## v4.4.2 - _July 31, 2019_
+
+    * Dependencies updated
+
+## v4.4.1 - _July 24, 2019_
+
+    * Dependencies updated
+
+## v4.4.0 - _July 13, 2019_
+
+    * Add function deleteNestedProperty (#1842)
+
+## v4.3.3 - _May 10, 2019_
+
+    * Fixed spelling error in ABI Encoder error message (#1808)
+
+## v4.3.2 - _Invalid date_
+
+    * Support for ABI encoding multibyte strings (fixes issue #1723) (#1806)
+
+## v4.3.1 - _April 11, 2019_
+
+    * Dependencies updated
+
 ## v4.3.0 - _March 21, 2019_
 
     * Added `startProviderEngine` to `providerUtils`. Preventing excess block polling (#1695)
